@@ -1,4 +1,3 @@
-#from coursemaster import CourseMaster
 import pickle
 # Token types
 VAR, SET, ID, MC, SA, LPAREN, RPAREN, FIRST, REST, SEMI, EOF = "VAR", "SET", \
@@ -132,7 +131,6 @@ class Lexer(object):
             if self.current_char.isalnum():
                 return self._id()
             # RESERVED_KEYWORDS & COURSE
-            # TODO: fix check for courses: CourseMaster().iscourse(current_token)
             elif self.current_char == "(":
                 self.advance()
                 return Token(LPAREN, "(")
@@ -506,7 +504,6 @@ class Interpreter(NodeVisitor):
             #TODO: doesn't work for nested lists yet
             def get(op, name):
                 return "%s: %s" % (name.upper(), op.lower())
-                #return "%s\n" % CourseMaster().get(op.lower(), name.upper())
             result = Token(LIST, [])
             if first.type != LIST and second.type != LIST:
                 result.value.append(Token(STR, get(first.value, second.value)))

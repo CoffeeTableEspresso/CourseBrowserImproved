@@ -454,6 +454,7 @@ class Interpreter(NodeVisitor):
                 if not node.right or self.visit(node.right):
                     for col in node.left.value:
                         print self.visit(col)
+                    print "-"*80
                 for pair in d.__dict__.items():
                     self.mem.delete(pair[0])
                     #store value
@@ -466,10 +467,11 @@ class Interpreter(NodeVisitor):
                     #    if node.right.left.value in getattr(d, node.right.right.value):
                     #        for col in node.left.value:
                     #            print getattr(d, col.value)
-                print "-"*80
             #print self.mem
-    #def visit_BinOp(self, node):
-    #   pass
+    def visit_BinOp(self, node):
+        if node.op.value == "IN":
+            if node.left.type == STR:
+                return node.left.value in self.visit(node.right) # TODO: case where left node is VAR    
     #def visit_UnOp(self, node):
     #    def multiply(first, second):
     #   pass

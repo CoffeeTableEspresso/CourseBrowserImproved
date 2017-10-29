@@ -2,8 +2,6 @@ import pickle
 # Token types
 VAR, SET, ID, MC, SA, LPAREN, RPAREN, FIRST, REST, SEMI, EOF = "VAR", "SET", \
 "ID", "MC", "SA", "LPAREN", "RPAREN", "FIRST", "REST", "SEMI", "EOF"
-IF, THEN, ELSE, FI = "IF", "THEN", "ELSE", "FI"
-ISEMPTY = "ISEMPTY"
 DEFUN, COLON, ARROW, COMMA, DOT, AT = "DEFUN", "COLON", "ARROW", "COMMA", "DOT", "AT"
 # Data types
 
@@ -15,7 +13,6 @@ LIST = "LIST"
 
 TYPES = ["COURSE", "DEPT", "YEAR"]
 # Course Operators
-OPS = ["ttl", "dsc", "pr", "po", "co", "i", "rl", "tr", "gr"]
 # list of depts.
 DEPTS = ['AANB', 'ACAM', 'ADHE', 'AFST', 'AGEC', 'ANAT', 'ANSC', 'ANTH',
          'APBI', 'APPP', 'APSC', 'ARBC', 'ARC', 'ARCH', 'ARCL', 'ARST',
@@ -106,12 +103,7 @@ class Lexer(object):
         while self.current_char is not None and (self.current_char.isalnum() or self.current_char == "_"):
             result += self.current_char
             self.advance()
-        if result in DEPTS: return Token(DEPT, result)
-        elif result in OPS: return Token(OP, result)
-        elif result in YEARS: return Token(YEAR, result)
-        elif result in TYPES: return Token(TYPE, result)
-        elif len(result) >= 4 and not result.isalpha(): return Token(COURSE, result)
-        else: return RESERVED_KEYWORDS.get(result, Token(ID, result))
+        return RESERVED_KEYWORDS.get(result, Token(ID, result))
     def _str(self):
         result = ""
         while self.current_char is not None and self.current_char != '"':
@@ -128,36 +120,36 @@ class Lexer(object):
         if self.pos >= len(text):
             return Token(EOF, None)
         while self.current_char is not None:
+            # RESERVED_KEYWORDS & ID
             if self.current_char.isalnum():
                 return self._id()
-            # RESERVED_KEYWORDS & COURSE
             elif self.current_char == "(":
                 self.advance()
                 return Token(LPAREN, "(")
             elif self.current_char == ")":
                 self.advance()
                 return Token(RPAREN, ")")
-            elif self.current_char == ":":
-                self.advance()
-                return Token(COLON, ":")
+            #elif self.current_char == ":":
+            #    self.advance()
+            #    return Token(COLON, ":")
             elif self.current_char == '"':
                 self.advance()
                 result = self._str()
                 self.advance()
                 return Token(STR, result)
-            elif self.current_char == "-" and self.peek() == ">":
-                self.advance()
-                self.advance()
-                return Token(ARROW, "->")
+            #elif self.current_char == "-" and self.peek() == ">":
+            #    self.advance()
+            #    self.advance()
+            #    return Token(ARROW, "->")
             elif self.current_char == ",":
                 self.advance()
                 return Token(COMMA, ",")
             elif self.current_char == "*":
                 self.advance()
                 return Token(STAR, "*")
-            elif self.current_char == ".":
-                self.advance()
-                return Token(DOT, ".")
+            #elif self.current_char == ".":
+            #    self.advance()
+            #    return Token(DOT, ".")
         self.error()
 
 
@@ -171,7 +163,6 @@ class Lexer(object):
 
 class AST(object):
     pass
-#TODO: add TriOp
 class TriOp(AST):
     def __init__(self, op, left, middle, right):
         self.left = left
@@ -190,18 +181,6 @@ class UnOp(AST):
 class NulOp(AST):
     def __init__(self, op):
         self.token = self.op = op
-class Course(AST):
-    def __init__(self, token):
-        self.token = token
-        self.value = token.value
-class Dept(AST):
-    def __init__(self, token):
-        self.token = token
-        self.value = token.value
-class Year(AST):
-    def __init__(self, token):
-        self.token = token
-        self.value = token.value
 class DB(AST):
     def __init__(self, token):
         self.token = token
@@ -214,11 +193,6 @@ class String(AST):
     def __init__(self, token):
         self.token = token
         self.value = token.value
-class IfThenElse(AST):
-    def __init__(self, cond, then_block, else_block):
-        self.cond = cond
-        self.then_block = then_block
-        self.else_block = else_block
 class Param(AST):
     def __init__(self, var_node):
         self.node = var_node
@@ -293,7 +267,7 @@ class Parser(object):
     def column(self):
         token = self.current_token
         self.eat(ID)
-        return Column(token)
+        return Var(token) #Column
     def cond(self):
         first = self.current_token
         self.eat(STR)
@@ -370,7 +344,6 @@ class ScopedSymbolTable(object):
             return self.parent.lookup(name)
         return None #not found
 
-# TODO: VAR can only declare nested lists one layer deep.
 
 class Memory(object):
     def __init__(self):
@@ -392,6 +365,7 @@ class Memory(object):
         result = ""
         for key in self._mem.keys():
             result += "%s: %s\n" % (key, self._mem.get(key))
+	return result
     __repr__ = __str__
 
 class Stack(object):
@@ -433,21 +407,11 @@ class SymbolTableBuilder(NodeVisitor):
         self.visit(node.expr)
     def visit_NulOp(self, node):
         pass
-    def visit_Course(self, node):
-        pass
-    def visit_Dept(self, node):
-        pass
-    def visit_Year(self, node):
-        pass
     def visit_DB(self, node):
         db_name = node.value
         db_symbol = self.scope.lookup(db_name)
         if db_symbol is None:
             raise NameError(repr(db_name))
-    def visit_IfThenElse(self, node):
-        self.visit(node.cond)
-        self.visit(node.then_block)
-        self.visit(node.else_block)
     def visit_Var(self, node):
         var_name = node.value
         var_symbol = self.scope.lookup(var_name)
@@ -486,69 +450,33 @@ class Interpreter(NodeVisitor):
             db = self.visit(node.middle)
             for d in db:
                 for pair in d.__dict__.items():
+                    self.mem.insert(pair[0], pair[1])
+                if not node.right or self.visit(node.right):
+                    for col in node.left.value:
+                        print self.visit(col)
+                    print "-"*80
+                for pair in d.__dict__.items():
+                    self.mem.delete(pair[0])
                     #store value
-                #visit cond node
-                # do stuff
-                #remove valuesre
+                    #visit cond node
+                    # do stuff
+                    #remove valuesre
 
 
-                #if node.right != None and node.right.op.value == IN:
-                #    if node.right.left.value in getattr(d, node.right.right.value):
-                #        for col in node.left.value:
-                #            print getattr(d, col.value)
-                        print "-"*80
+                    #if node.right != None and node.right.op.value == IN:
+                    #    if node.right.left.value in getattr(d, node.right.right.value):
+                    #        for col in node.left.value:
+                    #            print getattr(d, col.value)
+            #print self.mem
     def visit_BinOp(self, node):
-        return "SA: Year %s for %s" % (self.visit(node.left), self.visit(node.right))
-    def visit_UnOp(self, node):
-        def multiply(first, second):
-            #TODO: doesn't work for nested lists yet
-            def get(op, name):
-                return "%s: %s" % (name.upper(), op.lower())
-            result = Token(LIST, [])
-            if first.type != LIST and second.type != LIST:
-                result.value.append(Token(STR, get(first.value, second.value)))
-            elif first.type == LIST:
-                for element in first.value:
-                    result.value.append(multiply(element, second))
-            elif second.type == LIST:
-                for element in second.value:
-                    result.value.append(Token(STR, get(first.value, self.visit(element).value)))
-            return result
-        if node.op.type == OP:
-            return multiply(node.token, self.visit(node.expr))
-        elif node.op.type == REST:
-            tmp = Token(LIST, [])
-            for element in self.visit(node.expr).value[1:]:
-                tmp.value.append(element)
-            return tmp
-        elif node.op.type == FIRST:
-            result = self.visit(node.expr.value[0])
-            return result
-        elif node.op.type == ISEMPTY:
-            if len(self.visit(node.expr).value) == 0:
-                return Token(BOOL, True)
-            else:
-                return Token(BOOL, False)
-        else:
-            error()
-    def visit_NulOp(self, node):
-        return "MC TEXT"
-    def visit_Course(self, node):
-        if node.token.type == LIST:
-            result = Token(LIST, [])
-            for element in node.value:
-                result.value.append(element)
-            return result
-        else:
-            return node.token
-    def visit_Dept(self, node):
-        return node.token
-    def visit_Year(self, node):
-        return node.token
-    def visit_IfThenElse(self, node):
-        if self.visit(node.cond).value == True:
-            return self.visit(node.then_block)
-        else: return self.visit(node.else_block)
+        if node.op.value == "IN":
+            if node.left.type == STR:
+                return node.left.value in self.visit(node.right) # TODO: case where left node is VAR    
+    #def visit_UnOp(self, node):
+    #    def multiply(first, second):
+    #   pass
+    #def visit_NulOp(self, node):
+    #   return "MC TEXT"
     def visit_FuncDecl(self, node):
         self.mem.insert(node.value, (node.params, node.block))
     def visit_FuncCall(self, node):
@@ -564,13 +492,7 @@ class Interpreter(NodeVisitor):
     def visit_Assign(self, node):
         var_name = node.left.value
         result = self.visit(node.right)
-        if result.type == LIST:
-            temp = Token(LIST, [])
-            for element in result.value:
-                temp.value.append(self.visit(element))
-            #result = Token(LIST, [self.visit(element) for element in result.value])
-            self.mem.insert(var_name, temp)
-        else: self.mem.insert(var_name, result)
+        self.mem.insert(var_name, result)
         return self.mem.get(var_name)
     def visit_Var(self, node):
         var_name = node.value

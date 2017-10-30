@@ -8,48 +8,10 @@ DEFUN, COLON, ARROW, COMMA, DOT, AT = "DEFUN", "COLON", "ARROW", "COMMA", "DOT",
 OP = "OP"
 STR = "STR"
 SELECT, FROM, WHERE, IN = "SELECT", "FROM", "WHERE", "IN"
+CONTAINS = "CONTAINS"
 STAR = "STAR"
 EQUALS = "EQUALS"
 LIST = "LIST"
-
-TYPES = ["COURSE", "DEPT", "YEAR"]
-# Course Operators
-# list of depts.
-DEPTS = ['AANB', 'ACAM', 'ADHE', 'AFST', 'AGEC', 'ANAT', 'ANSC', 'ANTH',
-         'APBI', 'APPP', 'APSC', 'ARBC', 'ARC', 'ARCH', 'ARCL', 'ARST',
-         'ARTH', 'ARTS', 'ASIA', 'ASIC', 'ASLA', 'ASTR', 'ASTU', 'ATSC',
-         'AUDI', 'BA', 'BAAC', 'BABS', 'BAEN', 'BAFI', 'BAHC', 'BAHR',
-         'BAIM', 'BAIT', 'BALA', 'BAMA', 'BAMS', 'BAPA', 'BASC', 'BASD',
-         'BASM', 'BATL', 'BAUL', 'BIOC', 'BIOF', 'BIOL', 'BIOT', 'BMEG',
-         'BOTA', 'BRDG', 'BUSI', 'CAPS', 'CCFI', 'CCST', 'CDST', 'CEEN',
-         'CELL', 'CENS', 'CHBE', 'CHEM', 'CHIL', 'CHIN', 'CICS', 'CIVL',
-         'CLCH', 'CLST', 'CNPS', 'CNRS', 'CNTO', 'COEC', 'COGS', 'COHR',
-         'COMM', 'COMR', 'CONS', 'CPEN', 'CPSC', 'CRWR', 'CSIS', 'CSPW',
-         'CTLN', 'DANI', 'DENT', 'DERM', 'DES', 'DHYG', 'DMED', 'DSCI',
-         'ECED', 'ECON', 'ECPS', 'EDCP', 'EDST', 'EDUC', 'EECE', 'ELEC',
-         'ELI', 'EMBA', 'ENDS', 'ENGL', 'ENPH', 'ENPP', 'ENVR', 'EOSC',
-         'EPSE', 'ETEC', 'EXCH', 'EXGR', 'FACT', 'FEBC', 'FHIS', 'FIPR',
-         'FISH', 'FIST', 'FMPR', 'FMST', 'FNEL', 'FNH', 'FNIS', 'FOOD',
-         'FOPR', 'FRE', 'FREN', 'FRSI', 'FRST', 'FSCT', 'GBPR', 'GEM',
-         'GENE', 'GEOB', 'GEOG', 'GERM', 'GPP', 'GREK', 'GRS', 'GRSJ',
-         'GSAT', 'HEBR', 'HESO', 'HGSE', 'HINU', 'HIST', 'HPB', 'HUNU',
-         'IAR', 'IEST', 'IGEN', 'INDE', 'INDO', 'INDS', 'INFO', 'ISCI',
-         'ITAL', 'ITST', 'IWME', 'JAPN', 'JRNL', 'KIN', 'KORN', 'LAIS',
-         'LARC', 'LASO', 'LAST', 'LATN', 'LAW', 'LFS', 'LIBE', 'LIBR',
-         'LING', 'LLED', 'LWS', 'MATH', 'MDVL', 'MECH', 'MEDD', 'MEDG',
-         'MEDI', 'MGMT', 'MICB', 'MIDW', 'MINE', 'MRNE', 'MTRL', 'MUSC',
-         'NAME', 'NEST', 'NEUR', 'NRSC', 'NURS', 'OBMS', 'OBST', 'OHS',
-         'ONCO', 'OPTH', 'ORNT', 'ORPA', 'OSOT', 'PAED', 'PATH', 'PCTH',
-         'PERS', 'PHAR', 'PHIL', 'PHRM', 'PHTH', 'PHYL', 'PHYS', 'PLAN',
-         'PLNT', 'POLI', 'POLS', 'PORT', 'PSYC', 'PSYT', 'PUNJ', 'RADI',
-         'RELG', 'RES', 'RGLA', 'RHSC', 'RMST', 'RSOT', 'RUSS', 'SANS',
-         'SCAN', 'SCIE', 'SEAL', 'SGES', 'SLAV', 'SOAL', 'SOCI', 'SOIL',
-         'SOWK', 'SPAN', 'SPHA', 'SPPH', 'STAT', 'STS', 'SURG', 'SWED',
-         'TEST', 'THTR', 'TIBT', 'TRSC', 'UDES', 'UFOR', 'UKRN', 'URO',
-         'URST', 'URSY', 'VANT', 'VGRD', 'VISA', 'VRHC', 'VURS', 'WOOD',
-         'WRDS', 'WRIT', 'ZOOL']
-# list of years
-YEARS = ["0th", "1st", "2nd", "3rd", "4th", "5th", "6th"]
 
 
 ###############################################################################
@@ -74,6 +36,7 @@ RESERVED_KEYWORDS = {
     "FROM": Token("FROM", "FROM"),
     "WHERE": Token("WHERE", "WHERE"),
     "IN": Token(OP, "IN"),
+    "CONTAINS": Token(OP, "CONTAINS"),
     #"EQUALS": Token(OP, "=")
 }
 
@@ -490,6 +453,8 @@ class Interpreter(NodeVisitor):
     def visit_BinOp(self, node):
         if node.op.value == "IN":
             return self.visit(node.left) in self.visit(node.right)
+        elif node.op.value == "CONTAINS":
+            return self.visit(node.right) in self.visit(node.left)
         elif node.op.value == "=":
             return self.visit(node.left) == self.visit(node.right)
     #def visit_UnOp(self, node):

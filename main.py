@@ -9,6 +9,7 @@ OP = "OP"
 STR = "STR"
 SELECT, FROM, WHERE, IN = "SELECT", "FROM", "WHERE", "IN"
 STAR = "STAR"
+EQUALS = "EQUALS"
 LIST = "LIST"
 
 TYPES = ["COURSE", "DEPT", "YEAR"]
@@ -72,7 +73,8 @@ RESERVED_KEYWORDS = {
     "SELECT": Token("SELECT", "SELECT"),
     "FROM": Token("FROM", "FROM"),
     "WHERE": Token("WHERE", "WHERE"),
-    "IN": Token(OP, "IN")
+    "IN": Token(OP, "IN"),
+    #"EQUALS": Token(OP, "=")
 }
 
 
@@ -147,6 +149,9 @@ class Lexer(object):
             elif self.current_char == "*":
                 self.advance()
                 return Token(STAR, "*")
+            elif self.current_char == "=":
+                self.advance()
+                return Token(OP, "=")
             #elif self.current_char == ".":
             #    self.advance()
             #    return Token(DOT, ".")
@@ -252,7 +257,7 @@ class Parser(object):
         # TODO: fix return values
         if self.current_token.type == STAR:
             self.eat(STAR)
-            return Token(LIST, []) # TODO: find better placeholder for STAR
+            return Token(STAR, "*") # TODO: find better placeholder for STAR
         else:
             columns = []
             columns.append(self.column())
@@ -271,9 +276,10 @@ class Parser(object):
     def cond(self):
         first = self.current_token
         self.eat(STR)
+        op = self.current_token
         self.eat(OP)
         column = self.column()
-        return BinOp(Token(OP, IN), first, column)
+        return BinOp(op, first, column)
     def parse(self):
         while self.current_token.type != EOF:
             result = self.statement()
@@ -452,7 +458,7 @@ class Interpreter(NodeVisitor):
                 for pair in d.__dict__.items():
                     self.mem.insert(pair[0], pair[1])
                 if not node.right or self.visit(node.right):
-                    for col in node.left.value:
+                    for col in node.left.value: # TODO: update to handle SELECT * FROM ...
                         print self.visit(col)
                     print "-"*80
                 for pair in d.__dict__.items():
@@ -472,6 +478,8 @@ class Interpreter(NodeVisitor):
         if node.op.value == "IN":
             if node.left.type == STR:
                 return node.left.value in self.visit(node.right) # TODO: case where left node is VAR    
+        elif node.op.value == "=":
+                return node.left.value == self.visit(node.right) # TODO: case where left node is VAR    
     #def visit_UnOp(self, node):
     #    def multiply(first, second):
     #   pass

@@ -1,0 +1,12 @@
+statement        = select_statement;
+select_statement = SELECT columns FROM db [WHERE cond];
+columns          = STAR | column {COMMA column};
+column           = ID;
+db               = ID;
+cond             = string IN column | column EQUALS string 
+                 | cond OR cond | cond AND cond;
+string           = STRING | ID;
+assign		 = SET ID val
+val              = string | number
+number           = INT | ID
+

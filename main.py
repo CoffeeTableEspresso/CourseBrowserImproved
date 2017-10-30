@@ -186,6 +186,10 @@ class UnOp(AST):
 class NulOp(AST):
     def __init__(self, op):
         self.token = self.op = op
+class String(AST):
+    def __init__(self, token):
+        self.token = token
+        self.value = token.value
 class DB(AST):
     def __init__(self, token):
         self.token = token
@@ -274,12 +278,19 @@ class Parser(object):
         self.eat(ID)
         return Var(token) #Column
     def cond(self):
-        first = self.current_token
-        self.eat(STR)
+        if self.current_token.type == STR:
+            first = String(self.current_token)
+            self.eat(STR)
+        else:
+            first = self.column()
         op = self.current_token
         self.eat(OP)
-        column = self.column()
-        return BinOp(op, first, column)
+        if self.current_token.type == STR:
+            second = String(self.current_token)
+            self.eat(STR)
+        else:
+            second = self.column()
+        return BinOp(op, first, second)
     def parse(self):
         while self.current_token.type != EOF:
             result = self.statement()
@@ -413,6 +424,8 @@ class SymbolTableBuilder(NodeVisitor):
         self.visit(node.expr)
     def visit_NulOp(self, node):
         pass
+    def visit_String(self, node):
+        pass
     def visit_DB(self, node):
         db_name = node.value
         db_symbol = self.scope.lookup(db_name)
@@ -476,10 +489,9 @@ class Interpreter(NodeVisitor):
             #print self.mem
     def visit_BinOp(self, node):
         if node.op.value == "IN":
-            if node.left.type == STR:
-                return node.left.value in self.visit(node.right) # TODO: case where left node is VAR    
+            return self.visit(node.left) in self.visit(node.right)
         elif node.op.value == "=":
-                return node.left.value == self.visit(node.right) # TODO: case where left node is VAR    
+            return self.visit(node.left) == self.visit(node.right)
     #def visit_UnOp(self, node):
     #    def multiply(first, second):
     #   pass
@@ -516,6 +528,8 @@ class Interpreter(NodeVisitor):
             raise NameError(repr(db_name))
         else:
             return val
+    def visit_String(self, node):
+        return node.value
     def interpret(self):
         tree = self.parser.parse()
         self.stb.visit(tree)

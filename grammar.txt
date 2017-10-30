@@ -3,7 +3,7 @@ select_statement = SELECT columns FROM db [WHERE cond];
 columns          = STAR | column {COMMA column};
 column           = ID;
 db               = ID;
-cond             = string IN column | column EQUALS string 
+cond             = (val | column) IN (val | column) | (val | column) EQUALS (val | column)  
                  | cond OR cond | cond AND cond;
 string           = STRING | ID;
 assign		 = SET ID val

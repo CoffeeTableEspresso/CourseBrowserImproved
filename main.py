@@ -38,6 +38,7 @@ RESERVED_KEYWORDS = {
     "IN": Token(OP, "IN"),
     "CONTAINS": Token(OP, "CONTAINS"),
     "SET": Token("SET", "SET"),
+    "DEFUN": Token("DEFUN", "DEFUN"),
     #"EQUALS": Token(OP, "=")
 }
 
@@ -79,8 +80,6 @@ class Lexer(object):
     def get_next_token(self):
         # tokenizer
         text = self.text
-        #text = filter(None, text.replace("(", " ( ").replace(")", " ) ").replace(";", " ; ").split(" "))
-        # reached end of text?
         while self.current_char == " ":
             self.advance()
         if self.pos >= len(text):
@@ -95,18 +94,18 @@ class Lexer(object):
             elif self.current_char == ")":
                 self.advance()
                 return Token(RPAREN, ")")
-            #elif self.current_char == ":":
-            #    self.advance()
-            #    return Token(COLON, ":")
+            elif self.current_char == ":":
+                self.advance()
+                return Token(COLON, ":")
             elif self.current_char == '"':
                 self.advance()
                 result = self._str()
                 self.advance()
                 return Token(STR, result)
-            #elif self.current_char == "-" and self.peek() == ">":
-            #    self.advance()
-            #    self.advance()
-            #    return Token(ARROW, "->")
+            elif self.current_char == "-" and self.peek() == ">":
+                self.advance()
+                self.advance()
+                return Token(ARROW, "->")
             elif self.current_char == ",":
                 self.advance()
                 return Token(COMMA, ",")
@@ -213,8 +212,11 @@ class Parser(object):
             return self.select_statement()
         elif self.current_token.type == SET:
             return self.assign_var()
+        elif self.current_token.type == DEFUN:
+            return self.def_proc()
         else:
-            self.error()
+            return self.func_call() #TODO: tighten condition here
+        self.error()
     def select_statement(self):
         self.eat(SELECT)
         columns = self.columns()
@@ -230,7 +232,7 @@ class Parser(object):
         # TODO: fix return values
         if self.current_token.type == STAR:
             self.eat(STAR)
-            return Token(STAR, "*") # TODO: find better placeholder for STAR
+            return Token(STAR, "*") 
         else:
             columns = []
             columns.append(self.column())
@@ -269,6 +271,36 @@ class Parser(object):
         val = String(self.current_token) # TODO: case when current token is not STR
         self.eat(STR)
         return Assign(var, val)
+    def def_proc(self):
+        self.eat(DEFUN)
+        name = Var(self.current_token)
+        self.eat(ID)
+        self.eat(COLON)
+        params = []
+        if self.current_token.type != ARROW:
+            params.append(Var(self.current_token))
+            self.eat(ID)
+        while self.current_token.type != ARROW:
+            self.eat(COMMA)
+            params.append(Var(self.current_token))
+            self.eat(ID)
+        self.eat(ARROW)
+        body = self.statement()
+        return FuncDecl(name, params, body)
+    def func_call(self):
+        name = Var(self.current_token)
+        self.eat(ID)
+        self.eat(LPAREN)
+        params = []
+        params.append(String(self.current_token))
+        if self.current_token.type != RPAREN:
+            self.eat(STR)
+        while self.current_token.type != RPAREN:
+            self.eat(COMMA)
+            params.append(String(self.current_token))
+            self.eat(STR)
+        self.eat(RPAREN)
+        return FuncCall(name, params)
     def parse(self):
         while self.current_token.type != EOF:
             result = self.statement()
@@ -419,7 +451,6 @@ class Interpreter(NodeVisitor):
         elif node.op.value == "=":
             return self.visit(node.left) == self.visit(node.right)
     #def visit_UnOp(self, node):
-    #    def multiply(first, second):
     #   pass
     #def visit_NulOp(self, node):
     #   return "MC TEXT"

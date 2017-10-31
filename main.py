@@ -394,8 +394,6 @@ class Interpreter(NodeVisitor):
     def __init__(self, parser):
         self.parser = parser
         self.current_scope = ScopedSymbolTable("GLOBAL", 1)
-        self.stb = SymbolTableBuilder()
-        self.stb.scope = self.current_scope
         self.mem = Memory()
     def visit_TriOp(self, node):
         if node.op.type == SELECT:
@@ -456,7 +454,6 @@ class Interpreter(NodeVisitor):
         return node.value
     def interpret(self):
         tree = self.parser.parse()
-        self.stb.visit(tree)
         return self.visit(tree)
 
 

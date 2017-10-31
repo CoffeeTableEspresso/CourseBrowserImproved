@@ -8,47 +8,10 @@ DEFUN, COLON, ARROW, COMMA, DOT, AT = "DEFUN", "COLON", "ARROW", "COMMA", "DOT",
 OP = "OP"
 STR = "STR"
 SELECT, FROM, WHERE, IN = "SELECT", "FROM", "WHERE", "IN"
+CONTAINS = "CONTAINS"
 STAR = "STAR"
+EQUALS = "EQUALS"
 LIST = "LIST"
-
-TYPES = ["COURSE", "DEPT", "YEAR"]
-# Course Operators
-# list of depts.
-DEPTS = ['AANB', 'ACAM', 'ADHE', 'AFST', 'AGEC', 'ANAT', 'ANSC', 'ANTH',
-         'APBI', 'APPP', 'APSC', 'ARBC', 'ARC', 'ARCH', 'ARCL', 'ARST',
-         'ARTH', 'ARTS', 'ASIA', 'ASIC', 'ASLA', 'ASTR', 'ASTU', 'ATSC',
-         'AUDI', 'BA', 'BAAC', 'BABS', 'BAEN', 'BAFI', 'BAHC', 'BAHR',
-         'BAIM', 'BAIT', 'BALA', 'BAMA', 'BAMS', 'BAPA', 'BASC', 'BASD',
-         'BASM', 'BATL', 'BAUL', 'BIOC', 'BIOF', 'BIOL', 'BIOT', 'BMEG',
-         'BOTA', 'BRDG', 'BUSI', 'CAPS', 'CCFI', 'CCST', 'CDST', 'CEEN',
-         'CELL', 'CENS', 'CHBE', 'CHEM', 'CHIL', 'CHIN', 'CICS', 'CIVL',
-         'CLCH', 'CLST', 'CNPS', 'CNRS', 'CNTO', 'COEC', 'COGS', 'COHR',
-         'COMM', 'COMR', 'CONS', 'CPEN', 'CPSC', 'CRWR', 'CSIS', 'CSPW',
-         'CTLN', 'DANI', 'DENT', 'DERM', 'DES', 'DHYG', 'DMED', 'DSCI',
-         'ECED', 'ECON', 'ECPS', 'EDCP', 'EDST', 'EDUC', 'EECE', 'ELEC',
-         'ELI', 'EMBA', 'ENDS', 'ENGL', 'ENPH', 'ENPP', 'ENVR', 'EOSC',
-         'EPSE', 'ETEC', 'EXCH', 'EXGR', 'FACT', 'FEBC', 'FHIS', 'FIPR',
-         'FISH', 'FIST', 'FMPR', 'FMST', 'FNEL', 'FNH', 'FNIS', 'FOOD',
-         'FOPR', 'FRE', 'FREN', 'FRSI', 'FRST', 'FSCT', 'GBPR', 'GEM',
-         'GENE', 'GEOB', 'GEOG', 'GERM', 'GPP', 'GREK', 'GRS', 'GRSJ',
-         'GSAT', 'HEBR', 'HESO', 'HGSE', 'HINU', 'HIST', 'HPB', 'HUNU',
-         'IAR', 'IEST', 'IGEN', 'INDE', 'INDO', 'INDS', 'INFO', 'ISCI',
-         'ITAL', 'ITST', 'IWME', 'JAPN', 'JRNL', 'KIN', 'KORN', 'LAIS',
-         'LARC', 'LASO', 'LAST', 'LATN', 'LAW', 'LFS', 'LIBE', 'LIBR',
-         'LING', 'LLED', 'LWS', 'MATH', 'MDVL', 'MECH', 'MEDD', 'MEDG',
-         'MEDI', 'MGMT', 'MICB', 'MIDW', 'MINE', 'MRNE', 'MTRL', 'MUSC',
-         'NAME', 'NEST', 'NEUR', 'NRSC', 'NURS', 'OBMS', 'OBST', 'OHS',
-         'ONCO', 'OPTH', 'ORNT', 'ORPA', 'OSOT', 'PAED', 'PATH', 'PCTH',
-         'PERS', 'PHAR', 'PHIL', 'PHRM', 'PHTH', 'PHYL', 'PHYS', 'PLAN',
-         'PLNT', 'POLI', 'POLS', 'PORT', 'PSYC', 'PSYT', 'PUNJ', 'RADI',
-         'RELG', 'RES', 'RGLA', 'RHSC', 'RMST', 'RSOT', 'RUSS', 'SANS',
-         'SCAN', 'SCIE', 'SEAL', 'SGES', 'SLAV', 'SOAL', 'SOCI', 'SOIL',
-         'SOWK', 'SPAN', 'SPHA', 'SPPH', 'STAT', 'STS', 'SURG', 'SWED',
-         'TEST', 'THTR', 'TIBT', 'TRSC', 'UDES', 'UFOR', 'UKRN', 'URO',
-         'URST', 'URSY', 'VANT', 'VGRD', 'VISA', 'VRHC', 'VURS', 'WOOD',
-         'WRDS', 'WRIT', 'ZOOL']
-# list of years
-YEARS = ["0th", "1st", "2nd", "3rd", "4th", "5th", "6th"]
 
 
 ###############################################################################
@@ -72,7 +35,10 @@ RESERVED_KEYWORDS = {
     "SELECT": Token("SELECT", "SELECT"),
     "FROM": Token("FROM", "FROM"),
     "WHERE": Token("WHERE", "WHERE"),
-    "IN": Token(OP, "IN")
+    "IN": Token(OP, "IN"),
+    "CONTAINS": Token(OP, "CONTAINS"),
+    "SET": Token("SET", "SET"),
+    #"EQUALS": Token(OP, "=")
 }
 
 
@@ -147,6 +113,9 @@ class Lexer(object):
             elif self.current_char == "*":
                 self.advance()
                 return Token(STAR, "*")
+            elif self.current_char == "=":
+                self.advance()
+                return Token(OP, "=")
             #elif self.current_char == ".":
             #    self.advance()
             #    return Token(DOT, ".")
@@ -181,6 +150,10 @@ class UnOp(AST):
 class NulOp(AST):
     def __init__(self, op):
         self.token = self.op = op
+class String(AST):
+    def __init__(self, token):
+        self.token = token
+        self.value = token.value
 class DB(AST):
     def __init__(self, token):
         self.token = token
@@ -236,7 +209,12 @@ class Parser(object):
         else:
             self.error(token_type)
     def statement(self):
-        return self.select_statement()
+        if self.current_token.type == SELECT:
+            return self.select_statement()
+        elif self.current_token.type == SET:
+            return self.assign_var()
+        else:
+            self.error()
     def select_statement(self):
         self.eat(SELECT)
         columns = self.columns()
@@ -252,7 +230,7 @@ class Parser(object):
         # TODO: fix return values
         if self.current_token.type == STAR:
             self.eat(STAR)
-            return Token(LIST, []) # TODO: find better placeholder for STAR
+            return Token(STAR, "*") # TODO: find better placeholder for STAR
         else:
             columns = []
             columns.append(self.column())
@@ -269,11 +247,28 @@ class Parser(object):
         self.eat(ID)
         return Var(token) #Column
     def cond(self):
-        first = self.current_token
-        self.eat(STR)
+        if self.current_token.type == STR:
+            first = String(self.current_token)
+            self.eat(STR)
+        else:
+            first = self.column()
+        op = self.current_token
         self.eat(OP)
-        column = self.column()
-        return BinOp(Token(OP, IN), first, column)
+        if self.current_token.type == STR:
+            second = String(self.current_token)
+            self.eat(STR)
+        else:
+            second = self.column()
+        return BinOp(op, first, second)
+    def assign_var(self):
+        self.eat(SET)
+        var = Var(self.current_token)
+        self.eat(ID)
+        if self.current_token.value == "=":
+            self.eat(OP)
+        val = String(self.current_token) # TODO: case when current token is not STR
+        self.eat(STR)
+        return Assign(var, val)
     def parse(self):
         while self.current_token.type != EOF:
             result = self.statement()
@@ -395,49 +390,6 @@ class NodeVisitor(object):
     def generic_visit(self, node):
         raise Exception("No visit_%s method: %s" % (type(node).__name__, node))
 
-class SymbolTableBuilder(NodeVisitor):
-    def __init__(self):
-        self.scope = None # TODO: fix this
-    def visit_TriOp(self, node):
-        pass # TODO: fix this
-    def visit_BinOp(self, node):
-        self.visit(node.left)
-        self.visit(node.right)
-    def visit_UnOp(self, node):
-        self.visit(node.expr)
-    def visit_NulOp(self, node):
-        pass
-    def visit_DB(self, node):
-        db_name = node.value
-        db_symbol = self.scope.lookup(db_name)
-        if db_symbol is None:
-            raise NameError(repr(db_name))
-    def visit_Var(self, node):
-        var_name = node.value
-        var_symbol = self.scope.lookup(var_name)
-        if var_symbol is None:
-            raise NameError(repr(var_name))
-    def visit_FuncDecl(self, node):
-        #self.visit(node.block)
-        pass
-    def visit_FuncCall(self, node):
-        for param in node.params:
-            self.visit(param)
-    def visit_Decl(self, node):
-        type_name = node.left.value
-        type_symbol = self.scope.lookup(type_name)
-        var_name = node.right.value
-        var_symbol = VarSymbol(var_name, type_symbol)
-        if self.scope.lookup(var_name, True):
-            raise Exception("Error: Duplicate identifier %s found" % var_name)
-        self.scope.insert(var_symbol)
-    def visit_Assign(self, node):
-        var_name = node.left.value
-        var_symbol = self.scope.lookup(var_name)
-        if var_symbol is None:
-            raise NameError(repr(var_name))
-        self.visit(node.right)
-
 class Interpreter(NodeVisitor):
     def __init__(self, parser):
         self.parser = parser
@@ -452,26 +404,18 @@ class Interpreter(NodeVisitor):
                 for pair in d.__dict__.items():
                     self.mem.insert(pair[0], pair[1])
                 if not node.right or self.visit(node.right):
-                    for col in node.left.value:
+                    for col in node.left.value: # TODO: update to handle SELECT * FROM ...
                         print self.visit(col)
                     print "-"*80
                 for pair in d.__dict__.items():
                     self.mem.delete(pair[0])
-                    #store value
-                    #visit cond node
-                    # do stuff
-                    #remove valuesre
-
-
-                    #if node.right != None and node.right.op.value == IN:
-                    #    if node.right.left.value in getattr(d, node.right.right.value):
-                    #        for col in node.left.value:
-                    #            print getattr(d, col.value)
-            #print self.mem
     def visit_BinOp(self, node):
         if node.op.value == "IN":
-            if node.left.type == STR:
-                return node.left.value in self.visit(node.right) # TODO: case where left node is VAR    
+            return self.visit(node.left) in self.visit(node.right)
+        elif node.op.value == "CONTAINS":
+            return self.visit(node.right) in self.visit(node.left)
+        elif node.op.value == "=":
+            return self.visit(node.left) == self.visit(node.right)
     #def visit_UnOp(self, node):
     #    def multiply(first, second):
     #   pass
@@ -508,6 +452,8 @@ class Interpreter(NodeVisitor):
             raise NameError(repr(db_name))
         else:
             return val
+    def visit_String(self, node):
+        return node.value
     def interpret(self):
         tree = self.parser.parse()
         self.stb.visit(tree)

@@ -37,6 +37,7 @@ RESERVED_KEYWORDS = {
     "WHERE": Token("WHERE", "WHERE"),
     "IN": Token(OP, "IN"),
     "CONTAINS": Token(OP, "CONTAINS"),
+    "SET": Token("SET", "SET"),
     #"EQUALS": Token(OP, "=")
 }
 
@@ -208,7 +209,12 @@ class Parser(object):
         else:
             self.error(token_type)
     def statement(self):
-        return self.select_statement()
+        if self.current_token.type == SELECT:
+            return self.select_statement()
+        elif self.current_token.type == SET:
+            return self.assign_var()
+        else:
+            self.error()
     def select_statement(self):
         self.eat(SELECT)
         columns = self.columns()
@@ -254,6 +260,15 @@ class Parser(object):
         else:
             second = self.column()
         return BinOp(op, first, second)
+    def assign_var(self):
+        self.eat(SET)
+        var = Var(self.current_token)
+        self.eat(ID)
+        if self.current_token.value == "=":
+            self.eat(OP)
+        val = String(self.current_token) # TODO: case when current token is not STR
+        self.eat(STR)
+        return Assign(var, val)
     def parse(self):
         while self.current_token.type != EOF:
             result = self.statement()
@@ -375,51 +390,6 @@ class NodeVisitor(object):
     def generic_visit(self, node):
         raise Exception("No visit_%s method: %s" % (type(node).__name__, node))
 
-class SymbolTableBuilder(NodeVisitor):
-    def __init__(self):
-        self.scope = None # TODO: fix this
-    def visit_TriOp(self, node):
-        pass # TODO: fix this
-    def visit_BinOp(self, node):
-        self.visit(node.left)
-        self.visit(node.right)
-    def visit_UnOp(self, node):
-        self.visit(node.expr)
-    def visit_NulOp(self, node):
-        pass
-    def visit_String(self, node):
-        pass
-    def visit_DB(self, node):
-        db_name = node.value
-        db_symbol = self.scope.lookup(db_name)
-        if db_symbol is None:
-            raise NameError(repr(db_name))
-    def visit_Var(self, node):
-        var_name = node.value
-        var_symbol = self.scope.lookup(var_name)
-        if var_symbol is None:
-            raise NameError(repr(var_name))
-    def visit_FuncDecl(self, node):
-        #self.visit(node.block)
-        pass
-    def visit_FuncCall(self, node):
-        for param in node.params:
-            self.visit(param)
-    def visit_Decl(self, node):
-        type_name = node.left.value
-        type_symbol = self.scope.lookup(type_name)
-        var_name = node.right.value
-        var_symbol = VarSymbol(var_name, type_symbol)
-        if self.scope.lookup(var_name, True):
-            raise Exception("Error: Duplicate identifier %s found" % var_name)
-        self.scope.insert(var_symbol)
-    def visit_Assign(self, node):
-        var_name = node.left.value
-        var_symbol = self.scope.lookup(var_name)
-        if var_symbol is None:
-            raise NameError(repr(var_name))
-        self.visit(node.right)
-
 class Interpreter(NodeVisitor):
     def __init__(self, parser):
         self.parser = parser
@@ -439,17 +409,6 @@ class Interpreter(NodeVisitor):
                     print "-"*80
                 for pair in d.__dict__.items():
                     self.mem.delete(pair[0])
-                    #store value
-                    #visit cond node
-                    # do stuff
-                    #remove valuesre
-
-
-                    #if node.right != None and node.right.op.value == IN:
-                    #    if node.right.left.value in getattr(d, node.right.right.value):
-                    #        for col in node.left.value:
-                    #            print getattr(d, col.value)
-            #print self.mem
     def visit_BinOp(self, node):
         if node.op.value == "IN":
             return self.visit(node.left) in self.visit(node.right)

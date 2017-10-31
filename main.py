@@ -402,7 +402,11 @@ class Interpreter(NodeVisitor):
                 for pair in d.__dict__.items():
                     self.mem.insert(pair[0], pair[1])
                 if not node.right or self.visit(node.right):
-                    for col in node.left.value: # TODO: update to handle SELECT * FROM ...
+                    cols = node.left.value # TODO: make sure this works for large DB
+                    if node.left.value == "*":
+                        cols = [Var(Token(ID, pair[0])) for pair in d.__dict__.items()]
+                        cols.reverse()
+                    for col in cols:
                         print self.visit(col)
                     print "-"*80
                 for pair in d.__dict__.items():

@@ -9,4 +9,5 @@ string           = STRING | ID;
 assign		 = SET ID val
 val              = string | number
 number           = INT | ID
-
+func_def         = DEFUN ID COLON [ID {COMMA ID}] ARROW statement
+func_call        = ID LPAREN [ID {COMMA ID}] RPAREN

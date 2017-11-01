@@ -3,6 +3,8 @@ import pickle
 VAR, SET, ID, MC, SA, LPAREN, RPAREN, FIRST, REST, SEMI, EOF = "VAR", "SET", \
 "ID", "MC", "SA", "LPAREN", "RPAREN", "FIRST", "REST", "SEMI", "EOF"
 DEFUN, COLON, ARROW, COMMA, DOT, AT = "DEFUN", "COLON", "ARROW", "COMMA", "DOT", "AT"
+BEGIN, END = "BEGIN", "END"
+
 # Data types
 
 OP = "OP"
@@ -39,10 +41,12 @@ RESERVED_KEYWORDS = {
     "CONTAINS": Token(OP, "CONTAINS"),
     "SET": Token("SET", "SET"),
     "DEFUN": Token("DEFUN", "DEFUN"),
+    "BEGIN": Token("BEGIN", "BEGIN"),
+    "END": Token("END", "END"),
     #"EQUALS": Token(OP, "=")
 }
 
-
+# TODO: add INT
 class Lexer(object):
     def __init__(self, text):
         # string input
@@ -208,6 +212,8 @@ class Parser(object):
         else:
             self.error(token_type)
     def statement(self):
+        if self.current_token.type == BEGIN:
+            self.error() # TODO: implement this
         if self.current_token.type == SELECT:
             return self.select_statement()
         elif self.current_token.type == SET:
@@ -376,6 +382,7 @@ class Memory(object):
     def __init__(self):
         self._mem = {}
         self._mem["Courses"] = Stack().push(pickle.load(open("Courses.db")))
+        #self._mem["MC"] = Stack().push(pickle.load(open("MC.db"))) # TODO: clean this up
     def insert(self, key, value):
         #print "Insert: %s, %s" % (key, value)
         if key in self._mem.keys():

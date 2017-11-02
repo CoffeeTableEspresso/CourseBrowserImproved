@@ -1,13 +1,18 @@
 # CourseBrowserImproved
-usage: run `setup.py` when first downloaded to setup database.
-afterwards, run `main.py` to access REPL.
+A small terminal based program for browsing and filtering UBC courses.
+## Getting Started
+### Prerequisites
+Requires Python 2.7. Has small incompatibilities with Python 3, i.e. print statements.
+### Installing
+Download all files into same directory. Run `python setup.py`. 
+This should take about 5 to 15 minutes to run, and requires an internet connection.
+This setup should only be run once, when you first install everything.
 
-Note: you only need to run `setup.py` once, when you first start. It should take a few minutes to run.
-
-valid commands: 
-
+Afterwards, run `python main.py` to access REPL.
+## Usage
+run `python main.py` to access REPL, then type any valid command and press enter.
+### Valid Commands: 
 currently, the following commands are supported:
-
 * SELECT statements (based off SQL SELECT statements):
     - syntax: SELECT <fields> FROM <db> [WHERE <cond>]
     - e.g. `SELECT title FROM Courses WHERE "Calculus" IN description`

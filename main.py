@@ -382,7 +382,16 @@ class Memory(object):
     def __init__(self):
         self._mem = {}
         self._mem["Courses"] = Stack().push(pickle.load(open("Courses.db")))
-        #self._mem["MC"] = Stack().push(pickle.load(open("MC.db"))) # TODO: clean this up
+        self._mem["postreqs"] = Stack().push(([Var(Token(ID, "n"))], \
+                                         TriOp(Token(SELECT, SELECT), \
+                                               Token(LIST, [Var(Token(ID, "title"))]), \
+                                               DB(Token(ID, "Courses")), \
+                                               BinOp(Token(OP, IN), Var(Token(ID, "n")), Var(Token(ID, "prereqs"))))))
+        self._mem["get"] = Stack().push(([Var(Token(ID, "n"))], \
+                                         TriOp(Token(SELECT, SELECT), \
+                                               Token(STAR, "*"), \
+                                               DB(Token(ID, "Courses")), \
+                                               BinOp(Token(OP, "="), Var(Token(ID, "n")), Var(Token(ID, "name"))))))
     def insert(self, key, value):
         #print "Insert: %s, %s" % (key, value)
         if key in self._mem.keys():

@@ -10,9 +10,9 @@ This setup should only be run once, when you first install everything.
 
 Afterwards, run `python main.py` to access REPL.
 ## Usage
-run `python main.py` to access REPL, then type any valid command and press enter.
+Run `python main.py` to access REPL, then type any valid command and press enter.
 ### Valid Commands: 
-currently, the following commands are supported:
+Currently, the following commands are supported:
 * SELECT statements (based off SQL SELECT statements):
     - syntax: SELECT <fields> FROM <db> [WHERE <cond>]
     - e.g. `SELECT title FROM Courses WHERE "Calculus" IN description`

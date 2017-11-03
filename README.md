@@ -12,6 +12,7 @@ Afterwards, run `python main.py` to access REPL.
 ## Usage
 Run `python main.py` to access REPL, then type any valid command and press enter.
 ### Valid Commands: 
+See `grammar.ebnf` for full description of forms that valid commands can take.
 Currently, the following commands are supported:
 * SELECT statements (based off SQL SELECT statements):
     - syntax: SELECT <fields> FROM <db> [WHERE <cond>]

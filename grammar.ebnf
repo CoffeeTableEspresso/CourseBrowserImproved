@@ -1,0 +1,11 @@
+statement        = select_statement;
+select_statement = "SELECT" columns "FROM" db ["WHERE" cond];
+columns          = "*" | column {"," column};
+column           = ID;
+db               = ID;
+cond             = val "IN" val | val "CONTAINS" val | val "=" val  
+                 | cond OR cond | cond AND cond;
+assign		       = "SET" ID "=" val
+val              = string | number | column
+func_def         = "DEFUN" ID ":" [ID {COMMA ID}] "->" statement
+func_call        = ID "(" [ID {"," ID}] ")"

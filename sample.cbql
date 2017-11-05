@@ -18,6 +18,11 @@ get_title("MATH 320")
 # call get_title with param math320, defined above
 get_title(math320)
 
+### BEGIN ... END blocks
+# statements can be grouped together in BEGIN ... END blocks. 
+# the value of last statement in block is returned.
+BEGIN SET math = "MATH"; SELECT title FROM Courses WHERE math IN name; END
+
 ### builtins
 # gets postreqs of "MATH 320" (i.e. anything with "MATH 320" as a prereq)
 postreqs("MATH 320")

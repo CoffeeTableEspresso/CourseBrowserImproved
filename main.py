@@ -101,6 +101,9 @@ class Lexer(object):
             elif self.current_char == ":":
                 self.advance()
                 return Token(COLON, ":")
+            elif self.current_char == ";":
+                self.advance()
+                return Token(SEMI, ";")
             elif self.current_char == '"':
                 self.advance()
                 result = self._str()
@@ -213,7 +216,13 @@ class Parser(object):
             self.error(token_type)
     def statement(self):
         if self.current_token.type == BEGIN:
-            self.error() # TODO: implement this
+            self.eat(BEGIN)
+            statements = []
+            while self.current_token.type != END:
+                statements.append(self.statement())
+                self.eat(SEMI)
+            self.eat(END)
+            return UnOp(Token(BEGIN, BEGIN), Token(LIST, statements))
         if self.current_token.type == SELECT:
             return self.select_statement()
         elif self.current_token.type == SET:
@@ -466,8 +475,14 @@ class Interpreter(NodeVisitor):
             return self.visit(node.right) in self.visit(node.left)
         elif node.op.value == "=":
             return self.visit(node.left) == self.visit(node.right)
-    #def visit_UnOp(self, node):
-    #   pass
+    def visit_UnOp(self, node):
+        if node.op.type == BEGIN:
+            if len(node.expr.value) == 0:
+                return None
+            else:
+                for innernode in node.expr.value[:-1]:
+                    self.visit(innernode)
+                return self.visit(node.expr.value[-1]) 
     #def visit_NulOp(self, node):
     #   return "MC TEXT"
     def visit_FuncDecl(self, node):

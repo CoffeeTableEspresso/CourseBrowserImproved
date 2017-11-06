@@ -4,9 +4,9 @@ select_statement = "SELECT" columns "FROM" db ["WHERE" cond];
 columns          = "*" | column {"," column};
 column           = ID;
 db               = ID;
-cond             = val "IN" val | val "CONTAINS" val | val "=" val  
+cond             = val "IN" val | val "CONTAINS" val | val "=" val
                  | cond "|" cond | cond "&" cond;
-assign		 = "SET" ID "=" val;
+assign		       = "SET" ID "=" val;
 val              = string | number | column | db | ID;
 func_def         = "DEFUN" ID ":" [ID {COMMA ID}] "->" statement;
 func_call        = ID "(" [val {"," val}] ")";

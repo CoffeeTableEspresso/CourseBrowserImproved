@@ -233,6 +233,15 @@ class Parser(object):
         else:
             return self.func_call() #TODO: tighten condition here
         self.error()
+    def constant(self):
+        val = self.current_token
+        if val.type == STR:
+            self.eat(STR)
+            return String(val)
+        elif val.type == ID:
+            self.eat(ID)
+            return Var(val)
+        self.error()
     def select_statement(self):
         self.eat(SELECT)
         columns = self.columns()
@@ -265,18 +274,10 @@ class Parser(object):
         self.eat(ID)
         return Var(token) #Column
     def cond(self):
-        if self.current_token.type == STR:
-            first = String(self.current_token)
-            self.eat(STR)
-        else:
-            first = self.column()
+        first = self.constant() # TODO: make sure this doesn't give any errors
         op = self.current_token
         self.eat(OP)
-        if self.current_token.type == STR:
-            second = String(self.current_token)
-            self.eat(STR)
-        else:
-            second = self.column()
+        second = self.constant() # TODO: make sure this doesn't give any errors
         if self.current_token.value in ["&", "|"]:
             boolop = self.current_token
             self.eat(OP)
@@ -289,7 +290,7 @@ class Parser(object):
         self.eat(ID)
         if self.current_token.value == "=":
             self.eat(OP)
-        val = String(self.current_token) # TODO: case when current token is not STR
+        val = self.constant() # TODO: make sure this works
         self.eat(STR)
         return Assign(var, val)
     def def_proc(self):
@@ -313,13 +314,11 @@ class Parser(object):
         self.eat(ID)
         self.eat(LPAREN)
         params = []
-        params.append(String(self.current_token))
         if self.current_token.type != RPAREN:
-            self.eat(STR)
+            params.append(self.constant())
         while self.current_token.type != RPAREN:
             self.eat(COMMA)
-            params.append(String(self.current_token))
-            self.eat(STR)
+            params.append(self.constant())
         self.eat(RPAREN)
         return FuncCall(name, params)
     def parse(self):

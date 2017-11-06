@@ -3,7 +3,6 @@ from parser import Parser
 from interpreter import Interpreter
 import sys
 
-
 def main():
     interpreter = Interpreter("")
     while True:

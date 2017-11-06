@@ -3,7 +3,6 @@ from ast import *
 from parser import Parser
 from lexer import Lexer
 import pickle
-import sys
 
 ###############################################################################
 #                                                                             #

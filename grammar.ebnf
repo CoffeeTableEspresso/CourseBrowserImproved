@@ -1,4 +1,5 @@
-statement        = select_statement;
+statement        = select_statement | begin_block | assign | func_def | func_call;
+begin_block      = "BEGIN" [statement ";" {statement ";"}] "END";
 select_statement = "SELECT" columns "FROM" db ["WHERE" cond];
 columns          = "*" | column {"," column};
 column           = ID;

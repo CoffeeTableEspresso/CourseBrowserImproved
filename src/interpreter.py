@@ -158,6 +158,8 @@ class Interpreter(NodeVisitor):
             return self.visit(node.left) and self.visit(node.right)
         elif node.op.value == "|":
             return self.visit(node.left) or self.visit(node.right)
+        elif node.op.value == "||":
+            return "%s%s" % (self.visit(node.left), self.visit(node.right)) 
     def visit_UnOp(self, node):
         if node.op.type == BEGIN:
             if len(node.expr.value) == 0:

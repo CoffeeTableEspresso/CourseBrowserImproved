@@ -17,7 +17,15 @@ RESERVED_KEYWORDS = {
     "BEGIN": Token("BEGIN", "BEGIN"),
     "END": Token("END", "END"),
     "ECHO": Token("ECHO", "ECHO"),
+    "(": Token("LPAREN", "("),
+    ")": Token("RPAREN", ")"),
+    ":": Token("COLON", ":"),
+    ";": Token("SEMI", ";"),
+    ",": Token("COMMA", ","),
+    "*": Token("STAR", "*"), 
 }
+
+
 
 # TODO: add INT
 class Lexer(object):
@@ -65,18 +73,10 @@ class Lexer(object):
             # RESERVED_KEYWORDS & ID
             if self.current_char.isalnum():
                 return self._id()
-            elif self.current_char == "(":
+            elif self.current_char == "|" and self.peek() == "|":
                 self.advance()
-                return Token(LPAREN, "(")
-            elif self.current_char == ")":
                 self.advance()
-                return Token(RPAREN, ")")
-            elif self.current_char == ":":
-                self.advance()
-                return Token(COLON, ":")
-            elif self.current_char == ";":
-                self.advance()
-                return Token(SEMI, ";")
+                return Token(OP, "||")
             elif self.current_char == '"':
                 self.advance()
                 result = self._str()
@@ -86,14 +86,12 @@ class Lexer(object):
                 self.advance()
                 self.advance()
                 return Token(ARROW, "->")
-            elif self.current_char == ",":
-                self.advance()
-                return Token(COMMA, ",")
-            elif self.current_char == "*":
-                self.advance()
-                return Token(STAR, "*")
             elif self.current_char in ["=", "|", "&"]:
                 op = self.current_char
                 self.advance()
                 return Token(OP, op)
-        self.error()
+            elif self.current_char in RESERVED_KEYWORDS:
+                cur = self.current_char
+                self.advance()
+                return RESERVED_KEYWORDS[cur]
+            self.error()

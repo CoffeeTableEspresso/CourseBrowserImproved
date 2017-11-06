@@ -112,6 +112,15 @@ class Parser(object):
         body = self.statement()
         return FuncDecl(name, params, body)
     def val(self):
+        first = self.term()
+        if self.current_token.type == OP:
+            op = self.current_token
+            self.eat(OP)
+            second = self.term()
+            return BinOp(op, first, second) 
+        else: 
+            return first
+    def term(self):
         name = self.current_token
         # STR
         if self.current_token.type == STR:

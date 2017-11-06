@@ -3,6 +3,7 @@ from ast import *
 from parser import Parser
 from lexer import Lexer
 import pickle
+import os
 
 ###############################################################################
 #                                                                             #
@@ -68,7 +69,7 @@ class ScopedSymbolTable(object):
 class Memory(object):
     def __init__(self):
         self._mem = {}
-        self._mem["Courses"] = Stack().push(pickle.load(open("Courses.db")))
+        self._mem["Courses"] = Stack().push(pickle.load(open(os.path.join(os.path.dirname(__file__), "Courses.db"))))
         self._mem["postreqs"] = Stack().push(([Var(Token(ID, "n"))], \
                                          TriOp(Token(SELECT, SELECT), \
                                                Token(LIST, [Var(Token(ID, "title"))]), \

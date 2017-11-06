@@ -119,9 +119,10 @@ class Lexer(object):
             elif self.current_char == "*":
                 self.advance()
                 return Token(STAR, "*")
-            elif self.current_char == "=":
+            elif self.current_char in ["=", "|", "&"]:
+                op = self.current_char
                 self.advance()
-                return Token(OP, "=")
+                return Token(OP, op)
             #elif self.current_char == ".":
             #    self.advance()
             #    return Token(DOT, ".")
@@ -276,7 +277,12 @@ class Parser(object):
             self.eat(STR)
         else:
             second = self.column()
-        return BinOp(op, first, second)
+        if self.current_token.value in ["&", "|"]:
+            boolop = self.current_token
+            self.eat(OP)
+            return BinOp(boolop, BinOp(op, first, second), self.cond())
+        else:
+            return BinOp(op, first, second)
     def assign_var(self):
         self.eat(SET)
         var = Var(self.current_token)
@@ -475,6 +481,10 @@ class Interpreter(NodeVisitor):
             return self.visit(node.right) in self.visit(node.left)
         elif node.op.value == "=":
             return self.visit(node.left) == self.visit(node.right)
+        elif node.op.value == "&":
+            return self.visit(node.left) and self.visit(node.right)
+        elif node.op.value == "|":
+            return self.visit(node.left) or self.visit(node.right)
     def visit_UnOp(self, node):
         if node.op.type == BEGIN:
             if len(node.expr.value) == 0:

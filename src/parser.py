@@ -116,7 +116,7 @@ class Parser(object):
         if self.current_token.type == OP:
             op = self.current_token
             self.eat(OP)
-            second = self.term()
+            second = self.val()
             return BinOp(op, first, second) 
         else: 
             return first

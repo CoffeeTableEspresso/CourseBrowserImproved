@@ -5,6 +5,8 @@ SELECT title FROM Courses
 SELECT * FROM Courses WHERE "MATH" IN name
 # get title and description of all courses whose description contains "Calculus"
 SELECT title, description FROM Courses WHERE description CONTAINS "Calculus"
+# gets all info for all MATH courses with either "group" or "ring" in description
+SELECT * FROM Courses WHERE "MATH" IN name & "group" IN description | "ring" IN description
 
 ### variables
 # sets variable named math320 to value "MATH 320"

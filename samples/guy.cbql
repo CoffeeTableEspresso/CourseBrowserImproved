@@ -1,0 +1,5 @@
+ECHO "guy gets all upper year <arg> courses."
+DEFUN guy : d -> SELECT title FROM Courses WHERE d IN name & name CONTAINS " 3" | name CONTAINS " 4";
+guy("MATH");
+guy("STAT");
+guy("CPSC");

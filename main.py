@@ -291,7 +291,6 @@ class Parser(object):
         if self.current_token.value == "=":
             self.eat(OP)
         val = self.constant() # TODO: make sure this works
-        self.eat(STR)
         return Assign(var, val)
     def def_proc(self):
         self.eat(DEFUN)

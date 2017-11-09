@@ -91,8 +91,10 @@ class Parser(object):
         self.eat(SET)
         var = Var(self.current_token)
         self.eat(ID)
-        if self.current_token.value == "=":
+        if self.current_token.value == ":=":
             self.eat(OP)
+        else:
+            self.error()
         val = self.val() # TODO: make sure this works
         return Assign(var, val)
     def def_func(self):

@@ -87,8 +87,8 @@ class Lexer(object):
                 self.advance()
                 return Token(STR, result)
             # all other two character operators, see RESERVED_KEYWORDS 
-            elif self.current_char + self.peek() in RESERVED_KEYWORDS:
-                cur = self.current_char + self.peek()
+            elif self.current_char + (self.peek() or "") in RESERVED_KEYWORDS:
+                cur = self.current_char + (self.peek() or "")
                 self.advance()
                 self.advance()
                 return RESERVED_KEYWORDS[cur]

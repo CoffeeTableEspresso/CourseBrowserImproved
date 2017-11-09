@@ -80,6 +80,12 @@ class Memory(object):
                                                Token(STAR, "*"), \
                                                DB(Token(ID, "Courses")), \
                                                BinOp(Token(OP, "="), Var(Token(ID, "n")), Var(Token(ID, "name"))))))
+        self._mem["search"] = Stack().push(([Var(Token(ID, "n"))], \
+                                              TriOp(Token(SELECT, SELECT), \
+                                              Token(LIST, [Var(Token(ID, "title")), Var(Token(ID, "description"))]), \
+                                              DB(Token(ID, "Courses")), \
+                                              BinOp(Token(OP, IN), Var(Token(ID, "n")), Var(Token(ID, "description"))))))
+
     def insert(self, key, value):
         #print "Insert: %s, %s" % (key, value)
         if key in self._mem.keys():

@@ -23,6 +23,9 @@ RESERVED_KEYWORDS = {
     ";": Token("SEMI", ";"),
     ",": Token("COMMA", ","),
     "*": Token("STAR", "*"), 
+    "=": Token("OP", "="),
+    "&": Token("OP", "&"),
+    "|": Token("OP", "|"),
 }
 
 
@@ -70,26 +73,26 @@ class Lexer(object):
         if self.pos >= len(text):
             return Token(EOF, None)
         while self.current_char is not None:
-            # RESERVED_KEYWORDS & ID
+            # alphabetic RESERVED_KEYWORDS & ID
             if self.current_char.isalnum():
                 return self._id()
+            # STR concate OP
             elif self.current_char == "|" and self.peek() == "|":
                 self.advance()
                 self.advance()
                 return Token(OP, "||")
+            # STR
             elif self.current_char == '"':
                 self.advance()
                 result = self._str()
                 self.advance()
                 return Token(STR, result)
+            # func arrow
             elif self.current_char == "-" and self.peek() == ">":
                 self.advance()
                 self.advance()
                 return Token(ARROW, "->")
-            elif self.current_char in ["=", "|", "&"]:
-                op = self.current_char
-                self.advance()
-                return Token(OP, op)
+            # All other operators, see RESERVED_KEYWORDS
             elif self.current_char in RESERVED_KEYWORDS:
                 cur = self.current_char
                 self.advance()

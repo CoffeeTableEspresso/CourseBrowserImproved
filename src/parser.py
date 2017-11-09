@@ -113,7 +113,7 @@ class Parser(object):
         return FuncDecl(name, params, body)
     def val(self):
         first = self.term()
-        if self.current_token.type == OP:
+        if self.current_token.type == OP and self.current_token.value in ["||"]: #TODO: combine val and cond methods.
             op = self.current_token
             self.eat(OP)
             second = self.val()

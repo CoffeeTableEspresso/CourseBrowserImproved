@@ -7,6 +7,7 @@ db               = ID;
 cond             = val "IN" val | val "CONTAINS" val | val "=" val
                  | cond "|" cond | cond "&" cond;
 assign		       = "SET" ID "=" val;
-val              = string | number | column | db | ID;
+val              = term {"||" term};
+term             = string | ID | func_call;
 func_def         = "DEFUN" ID ":" [ID {COMMA ID}] "->" statement;
 func_call        = ID "(" [val {"," val}] ")";

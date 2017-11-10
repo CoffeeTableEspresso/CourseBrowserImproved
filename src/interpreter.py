@@ -154,10 +154,10 @@ class Interpreter(NodeVisitor):
                 for pair in d.__dict__.items():
                     self.mem.delete(pair[0])
     def visit_BinOp(self, node):
-        if node.op.value == "IN":
-            return self.visit(node.left) in self.visit(node.right)
+        if node.op.value == "IN": # TODO: update this so IN and CONTAINS are handled by same condition in visit_BinOp
+            return self.visit(node.left).upper() in self.visit(node.right).upper()
         elif node.op.value == "CONTAINS":
-            return self.visit(node.right) in self.visit(node.left)
+            return self.visit(node.right).upper() in self.visit(node.left).upper()
         elif node.op.value == "=":
             return self.visit(node.left) == self.visit(node.right)
         elif node.op.value == "<>":

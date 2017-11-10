@@ -63,10 +63,11 @@ class Parser(object):
             return Token(STAR, "*")
         else:
             columns = []
-            columns.append(self.column())
+            columns.append(self.val())
             while self.current_token.type == COMMA:
                 self.eat(COMMA)
-                columns.append(self.column())
+                columns.append(self.val()) 
+                # columns.append(self.column())
             return Token(LIST, columns)
     def db(self):
         token = self.current_token

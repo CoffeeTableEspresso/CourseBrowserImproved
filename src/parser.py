@@ -15,7 +15,6 @@ class Parser(object):
         raise Exception("Expected %s Token at pos %s, got %s" % \
             (token_type, self.lexer.pos, self.current_token))
     def eat(self, token_type):
-        #print self.current_token
         if self.current_token.type == token_type:
             self.current_token = self.lexer.get_next_token()
         else:

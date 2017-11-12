@@ -76,7 +76,7 @@ def build_db(btree):
                 except IndexError:
                     description = ""
                     title = ""
-                btree.insert(Course(name, title, description, prereqs, coreqs))
+                btree.insert(Course(str(name), str(title), str(description), str(prereqs), str(coreqs)))
                 print '\r' + name,
                 sys.stdout.flush()
     print '\r' + " "*8 + '\r',

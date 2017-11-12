@@ -167,16 +167,10 @@ class Interpreter(NodeVisitor):
     def visit_BinOp(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right)
-        #print "left type is %s" % type(left)
-        #print "right type is %s" % type(right)
         if node.op.value in ["=", "<>", "IN", "CONTAINS", "||"]: # TODO: update this so IN and CONTAINS are handled by same condition in visit_BinOp
-            pass
-            # assert type(left) is type(right) is str
+            assert type(left) is type(right) is str
         else:
-            try:
-                assert type(left) is type(right) is bool
-            except Exception:
-                print type(left), type(right)
+            assert type(left) is type(right) is bool
         return EVAL[node.op.value](left, right)
     def visit_UnOp(self, node):
         if node.op.type == BEGIN:

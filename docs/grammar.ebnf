@@ -1,13 +1,15 @@
-statement        = select_statement | begin_block | assign | func_def | func_call;
-begin_block      = "BEGIN" [statement ";" {statement ";"}] "END";
-select_statement = "SELECT" columns "FROM" db ["WHERE" cond];
-columns          = "*" | column {"," column};
-column           = ID;
+program          = {statement | expr | begin_block};
+statement        = select_statement | func_def;
+select_statement = "SELECT" cols "FROM" db ["WHERE" bool_expr];
+cols             = "*" | const {"," const};
 db               = ID;
-cond             = val "IN" val | val "CONTAINS" val | val "=" val
-                 | cond "|" cond | cond "&" cond;
-assign           = "SET" ID "=" val;
-val              = term {"||" term};
-term             = string | ID | func_call;
-func_def         = "DEFUN" ID ":" [ID {COMMA ID}] "->" statement;
-func_call        = ID "(" [val {"," val}] ")";
+func_def         = "DEFUN" ID ":" [ID {"," ID}] "->" program;
+expr             = const | asgn | begin_block;
+bool_expr        = const ("=" | "<>") const | bool_fact {("|" | "&") bool_fact};
+bool_fact        = const | "!" bool_fact | "(" expr ")";
+str_expr         = str_fact {"||" str_fact};
+str_fact         = const | "(" expr ")";
+asgn             = "SET" ID ":=" const;
+const            = bool_expr | str_expr | func_call | ID;
+func_call        = ID "(" [const {"," const}] ")";
+begin_block      = "BEGIN" [program ";" {program ";"}] "END";

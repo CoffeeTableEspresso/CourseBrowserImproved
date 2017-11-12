@@ -5,6 +5,17 @@ from lexer import Lexer
 import pickle
 import os
 
+# TODO: decide if short circuit
+EVAL = {
+        "IN": (lambda x,y : x.upper() in y.upper()),
+        "CONTAINS": (lambda x,y : y.upper() in x.upper()),
+        "||": (lambda x,y : x + y),
+        "=": (lambda x,y : x == y),
+        "<>": (lambda x,y : x != y),
+        "&": (lambda x,y : x and y), 
+        "|": (lambda x,y : x or y),
+       } 
+
 ###############################################################################
 #                                                                             #
 #  INTERPRETER                                                                #
@@ -154,20 +165,19 @@ class Interpreter(NodeVisitor):
                 for pair in d.__dict__.items():
                     self.mem.delete(pair[0])
     def visit_BinOp(self, node):
-        if node.op.value == "IN": # TODO: update this so IN and CONTAINS are handled by same condition in visit_BinOp
-            return self.visit(node.left).upper() in self.visit(node.right).upper()
-        elif node.op.value == "CONTAINS":
-            return self.visit(node.right).upper() in self.visit(node.left).upper()
-        elif node.op.value == "=":
-            return self.visit(node.left) == self.visit(node.right)
-        elif node.op.value == "<>":
-            return self.visit(node.left) != self.visit(node.right)
-        elif node.op.value == "&":
-            return self.visit(node.left) and self.visit(node.right)
-        elif node.op.value == "|":
-            return self.visit(node.left) or self.visit(node.right)
-        elif node.op.value == "||":
-            return "%s%s" % (self.visit(node.left), self.visit(node.right)) 
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        #print "left type is %s" % type(left)
+        #print "right type is %s" % type(right)
+        if node.op.value in ["=", "<>", "IN", "CONTAINS", "||"]: # TODO: update this so IN and CONTAINS are handled by same condition in visit_BinOp
+            pass
+            # assert type(left) is type(right) is str
+        else:
+            try:
+                assert type(left) is type(right) is bool
+            except Exception:
+                print type(left), type(right)
+        return EVAL[node.op.value](left, right)
     def visit_UnOp(self, node):
         if node.op.type == BEGIN:
             if len(node.expr.value) == 0:

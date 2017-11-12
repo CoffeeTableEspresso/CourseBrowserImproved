@@ -7,8 +7,8 @@ import os
 
 # TODO: decide if short circuit
 EVAL = {
-        "IN": (lambda x,y : x.upper() in y.upper()),
-        "CONTAINS": (lambda x,y : y.upper() in x.upper()),
+        "<": (lambda x,y : x.upper() in y.upper()),
+        ">": (lambda x,y : y.upper() in x.upper()),
         "||": (lambda x,y : x + y),
         "=": (lambda x,y : x == y),
         "<>": (lambda x,y : x != y),
@@ -55,10 +55,10 @@ class ScopedSymbolTable(object):
         self._init_builtins()
     def _init_builtins(self):
         self.insert(VarSymbol("Courses", "DB"))
-        self.insert(BuiltinTypeSymbol("DB"))
-        self.insert(BuiltinTypeSymbol("COURSE"))
-        self.insert(BuiltinTypeSymbol("DEPT"))
-        self.insert(BuiltinTypeSymbol("YEAR"))
+        # self.insert(BuiltinTypeSymbol("DB"))
+        # self.insert(BuiltinTypeSymbol("COURSE"))
+        # self.insert(BuiltinTypeSymbol("DEPT"))
+        # self.insert(BuiltinTypeSymbol("YEAR"))
     def __str__(self):
         return "Symbols: %s" % str([value for value in self._symbols.values()])
     __repr__ = __str__
@@ -81,22 +81,6 @@ class Memory(object):
     def __init__(self):
         self._mem = {}
         self._mem["Courses"] = Stack().push(pickle.load(open(os.path.join(os.path.dirname(__file__), "Courses.db"))))
-        self._mem["postreqs"] = Stack().push(([Var(Token(ID, "n"))], \
-                                         TriOp(Token(SELECT, SELECT), \
-                                               Token(LIST, [Var(Token(ID, "title"))]), \
-                                               DB(Token(ID, "Courses")), \
-                                               BinOp(Token(OP, IN), Var(Token(ID, "n")), Var(Token(ID, "prereqs"))))))
-        self._mem["get"] = Stack().push(([Var(Token(ID, "n"))], \
-                                         TriOp(Token(SELECT, SELECT), \
-                                               Token(STAR, "*"), \
-                                               DB(Token(ID, "Courses")), \
-                                               BinOp(Token(OP, "="), Var(Token(ID, "n")), Var(Token(ID, "name"))))))
-        self._mem["search"] = Stack().push(([Var(Token(ID, "n"))], \
-                                              TriOp(Token(SELECT, SELECT), \
-                                              Token(LIST, [Var(Token(ID, "title")), Var(Token(ID, "description"))]), \
-                                              DB(Token(ID, "Courses")), \
-                                              BinOp(Token(OP, IN), Var(Token(ID, "n")), Var(Token(ID, "description"))))))
-
     def insert(self, key, value):
         #print "Insert: %s, %s" % (key, value)
         if key in self._mem.keys():
@@ -167,7 +151,7 @@ class Interpreter(NodeVisitor):
     def visit_BinOp(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right)
-        if node.op.value in ["=", "<>", "IN", "CONTAINS", "||"]: # TODO: update this so IN and CONTAINS are handled by same condition in visit_BinOp
+        if node.op.value in ["=", "<>", "<", ">", "||"]: # TODO: update this so IN and CONTAINS are handled by same condition in visit_BinOp
             assert type(left) is type(right) is str
         else:
             assert type(left) is type(right) is bool
@@ -184,11 +168,14 @@ class Interpreter(NodeVisitor):
             val = self.visit(node.expr)
             print val
             return val
+        elif node.op.type == INCLUDE:
+            pass
     #def visit_NulOp(self, node):
     #   return "MC TEXT"
     def visit_FuncDecl(self, node):
         self.mem.insert(node.value, (node.params, node.block))
     def visit_FuncCall(self, node):
+        print node.value
         func = self.mem.get(node.value)
         for i in range(0, len(func[0])):
             self.mem.insert(func[0][i].value, self.visit(node.params[i]))
@@ -223,30 +210,3 @@ class Interpreter(NodeVisitor):
         tree = self.parser.parse()
         return self.visit(tree)
 
-def main():
-    interpreter = Interpreter("")
-    while True:
-        try:
-            text = raw_input(">>> ")
-        except EOFError:
-            break
-        if not text:
-            continue
-        lexer = Lexer(text)
-        parser = Parser(lexer)
-        interpreter.parser = parser # = Interpreter(parser)
-        result = interpreter.interpret()
-        print result
-
-if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        main()
-    else:
-        assert(len(sys.argv) == 2)
-        interpreter = Interpreter("")
-        texts = open(sys.argv[1]).read().splitlines() #TODO: make more general, so file can be located anywhere
-        for text in texts: #TODO: fix so that expressions can cross newlines
-            lexer = Lexer(text)
-            parser = Parser(lexer)
-            interpreter.parser = parser # = Interpreter(parser)
-            result = interpreter.interpret()

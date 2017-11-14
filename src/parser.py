@@ -149,6 +149,10 @@ class Parser(object):
             self.eat(OP)
             val = self.expr()
             return Assign(var, val)
+        elif self.current_token.value == "||=":
+            self.eat(OP)
+            val = self.expr()
+            return Assign(var, BinOp(Token(OP, "||"), var, val))
         else: 
             self.error() #TODO: add support for ||=   
     def func_call(self):

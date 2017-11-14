@@ -175,7 +175,6 @@ class Interpreter(NodeVisitor):
     def visit_FuncDecl(self, node):
         self.mem.insert(node.value, (node.params, node.block))
     def visit_FuncCall(self, node):
-        print node.value
         func = self.mem.get(node.value)
         for i in range(0, len(func[0])):
             self.mem.insert(func[0][i].value, self.visit(node.params[i]))

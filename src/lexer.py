@@ -21,6 +21,7 @@ RESERVED_KEYWORDS = {
     "ECHO": Token("ECHO", "ECHO"),
     "->": Token("ARROW", "->"),
     ":=": Token("OP", ":="),
+    "||=": Token(OP, "||="),
     #"True": Token("BOOL", "True"),
     #"False": Token("BOOL", "False"),
     "||": Token("OP", "||"),
@@ -34,6 +35,7 @@ RESERVED_KEYWORDS = {
     "=": Token("OP", "="),
     "&": Token("OP", "&"),
     "|": Token("OP", "|"),
+    "!": Token(OP, "!"),
 }
 
 
@@ -49,8 +51,8 @@ class Lexer(object):
         self.current_char = self.text[0]
     def error(self):
         raise Exception("LEXING ERROR: %s" % self.text[self.pos])
-    def peek(self):
-        peek_pos = self.pos + 1
+    def peek(self, lookahead=1):
+        peek_pos = self.pos + lookahead
         if peek_pos >= len(self.text):
             return None
         else:
@@ -91,6 +93,12 @@ class Lexer(object):
                 self.advance()
                 return Token(STR, result)
             # all other two character operators, see RESERVED_KEYWORDS 
+            elif self.current_char + (self.peek() or "") + (self.peek(2) or "") in RESERVED_KEYWORDS:
+                cur = self.current_char + (self.peek() or "") + (self.peek(2) or "")
+                self.advance()
+                self.advance()
+                self.advance()
+                return RESERVED_KEYWORDS[cur]
             elif self.current_char + (self.peek() or "") in RESERVED_KEYWORDS:
                 cur = self.current_char + (self.peek() or "")
                 self.advance()

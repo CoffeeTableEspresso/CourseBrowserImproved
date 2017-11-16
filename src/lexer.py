@@ -10,31 +10,36 @@ RESERVED_KEYWORDS = {
     "SELECT": Token("SELECT", "SELECT"),
     "FROM": Token("FROM", "FROM"),
     "WHERE": Token("WHERE", "WHERE"),
-    "IN": Token(OP, "<"),
-    "<": Token(OP, "<"),
-    "CONTAINS": Token(OP, ">"),
-    ">": Token(OP, ">"),
     "SET": Token("SET", "SET"),
     "BEGIN": Token("BEGIN", "BEGIN"),
     "END": Token("END", "END"),
     "DEFUN": Token("DEFUN", "DEFUN"),
     "ECHO": Token("ECHO", "ECHO"),
     "->": Token("ARROW", "->"),
-    ":=": Token("OP", ":="),
-    "||=": Token(OP, "||="),
     #"True": Token("BOOL", "True"),
     #"False": Token("BOOL", "False"),
-    "||": Token("OP", "||"),
-    "(": Token("LPAREN", "("),
-    ")": Token("RPAREN", ")"),
     ":": Token("COLON", ":"),
     ";": Token("SEMI", ";"),
     ",": Token("COMMA", ","),
-    "*": Token("STAR", "*"), 
-    "<>": Token("OP", "<>"),
-    "=": Token("OP", "="),
+    "(": Token("LPAREN", "("),
+    ")": Token("RPAREN", ")"),
+    ":=": Token(OP, ":="),
+    "||=": Token(OP, "||="),
+    "+=": Token(OP, "+="),
+    "*=": Token(OP, "*="),
+    #"-=": Token(OP, "-="),
     "&": Token("OP", "&"),
     "|": Token("OP", "|"),
+    "<>": Token("OP", "<>"),
+    "=": Token("OP", "="),
+    "IN": Token(OP, "<"),
+    "<": Token(OP, "<"),
+    "CONTAINS": Token(OP, ">"),
+    ">": Token(OP, ">"),
+    "+": Token(OP, "+"),
+    "-": Token(OP, "-"),
+    "||": Token("OP", "||"),
+    "*": Token(OP, "*"),
     "!": Token(OP, "!"),
 }
 
@@ -75,6 +80,12 @@ class Lexer(object):
             result += self.current_char
             self.advance()
         return result
+    def _int(self):
+        result = ""
+        while self.current_char is not None and (self.current_char.isdigit() or self.current_char == "_"):
+            result += self.current_char
+            self.advance()
+        return Token(INT, int(result.replace("_", "")))   
     def get_next_token(self):
         # tokenizer
         text = self.text
@@ -84,6 +95,8 @@ class Lexer(object):
             return Token(EOF, None)
         while self.current_char is not None:
             # alphabetic RESERVED_KEYWORDS & ID
+            if self.current_char.isdigit():
+                return self._int()
             if self.current_char.isalnum():
                 return self._id()
             # STR

@@ -16,16 +16,19 @@ See `grammar.ebnf` for full description of forms that valid commands can take, a
 The following commands are useful for getting started:
 * SELECT statements (based off SQL SELECT statements):
     - syntax: SELECT <fields> FROM <db> [WHERE <cond>]
-    - e.g. `SELECT title FROM Courses WHERE "Calculus" IN description`
+    - e.g. `SELECT title FROM Courses WHERE "Calculus" < description`
 * variables:
-    - syntax: SET <var_name> = <val>
-    - e.g. `SET best_dept = "MATH"`
+    - syntax: <var_name> := <val>
+    - e.g. `best_dept := "MATH"`
+* operators:
+    - supports `+, -, *` for `INT`, `||, <, >` (`STR` concat and contains) for `STR`, `!, &, |` for `BOOL`.
 * function definitions:
     - syntax: DEFUN <name> : <params> -> <body>
-    - e.g. `DEFUN postreqs : n -> SELECT title FROM Courses WHERE n IN prereqs`
+    - e.g. `DEFUN postreqs : n -> SELECT title FROM Courses WHERE n < prereqs`
 * function calls:
     - syntax: f(arg1, arg2, ... , argN)
     - e.g. `get("MATH 443")`
 * builtin functions (e.g. get, postreqs):
    - get(course_name): returns all info for course with given course name.
    - postreqs(course_name): returns title of all courses with course_name as a prereq.
+   - search(string): returns all courses with string in title or description.

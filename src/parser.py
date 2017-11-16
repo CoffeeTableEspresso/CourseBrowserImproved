@@ -90,7 +90,15 @@ class Parser(object):
         elif self.next_token.value in [":=", "||=", "*=", "+=", "-="]:
             return self.asgn()
         else:
-            return self.fact0()
+            curr = self.fact0()
+            if self.current_token.value == "?":
+                self.eat(QMARK)
+                first = self.fact0()
+                self.eat(COLON)
+                second = self.fact0()
+                return TriOp(Token(OP, "?:"), curr, first, second)
+            else:
+                return curr    
     def fact0(self):
         curr = self.fact1()
         while self.current_token.value in ["&", "|"]:

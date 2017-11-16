@@ -9,7 +9,10 @@ import os
 EVAL = {
         "<": (lambda x,y : x.upper() in y.upper()),
         ">": (lambda x,y : y.upper() in x.upper()),
+        "*": (lambda x,y: x * y),
         "||": (lambda x,y : x + y),
+        "+": (lambda x,y : x + y),
+        "-": (lambda x,y : x - y),
         "=": (lambda x,y : x == y),
         "<>": (lambda x,y : x != y),
         "&": (lambda x,y : x and y), 
@@ -151,7 +154,11 @@ class Interpreter(NodeVisitor):
     def visit_BinOp(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right)
-        if node.op.value in ["=", "<>", "<", ">", "||"]: # TODO: update this so IN and CONTAINS are handled by same condition in visit_BinOp
+        if node.op.value in ["=", "<>"]:
+            pass
+        elif node.op.value in ["+", "*", "-"]:
+            assert type(left) is type(right) is int
+        elif node.op.value in ["<", ">", "||"]: # TODO: update this so IN and CONTAINS are handled by same condition in visit_BinOp
             assert type(left) is type(right) is str
         else:
             assert type(left) is type(right) is bool
@@ -168,8 +175,14 @@ class Interpreter(NodeVisitor):
             val = self.visit(node.expr)
             print val
             return val
-        elif node.op.type == INCLUDE:
-            pass
+        elif node.op.value == "!":
+            val = self.visit(node.expr)
+            assert type(val) is bool
+            return not val
+        elif node.op.value == "-":
+            val = self.visit(node.expr)
+            assert type(val) is int
+            return -val
     #def visit_NulOp(self, node):
     #   return "MC TEXT"
     def visit_FuncDecl(self, node):
@@ -204,6 +217,10 @@ class Interpreter(NodeVisitor):
         else:
             return val
     def visit_String(self, node):
+        return node.value
+    def visit_Boolean(self, node):
+        return node.value
+    def visit_Integer(self, node):
         return node.value
     def interpret(self):
         tree = self.parser.parse()

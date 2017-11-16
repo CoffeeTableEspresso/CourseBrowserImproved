@@ -93,9 +93,9 @@ class Parser(object):
             curr = self.fact0()
             if self.current_token.value == "?":
                 self.eat(QMARK)
-                first = self.fact0()
+                first = self.expr()
                 self.eat(COLON)
-                second = self.fact0()
+                second = self.expr()
                 return TriOp(Token(OP, "?:"), curr, first, second)
             else:
                 return curr    

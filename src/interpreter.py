@@ -151,6 +151,13 @@ class Interpreter(NodeVisitor):
                     print "-"*80
                 for pair in d.__dict__.items():
                     self.mem.delete(pair[0])
+        elif node.op.value == "?:":
+            cond = self.visit(node.left)
+            assert type(cond) is bool
+            if cond:
+                return self.visit(node.middle)
+            else:
+                return self.visit(node.right)
     def visit_BinOp(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right)

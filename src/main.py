@@ -4,6 +4,10 @@ from interpreter import Interpreter
 import sys
 
 BUILTINS = """BEGIN 
+                  DEFUN True : -> "" = "";
+                  DEFUN False : -> "" <> "";
+                  true := True();
+                  false := False();
                   DEFUN search : query -> SELECT title, description FROM Courses WHERE query < title | query < description;
                   DEFUN get : query -> SELECT * FROM Courses WHERE query = name;
                   DEFUN postreqs : query -> SELECT title FROM Courses WHERE query < prereqs; 
@@ -14,7 +18,7 @@ def main():
     interpreter.interpret()
     while True:
         try:
-            text = raw_input(">>> ")
+            text = raw_input("CBQL> ")
         except EOFError:
             break
         if not text:

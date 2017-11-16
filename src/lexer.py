@@ -10,30 +10,37 @@ RESERVED_KEYWORDS = {
     "SELECT": Token("SELECT", "SELECT"),
     "FROM": Token("FROM", "FROM"),
     "WHERE": Token("WHERE", "WHERE"),
-    "IN": Token(OP, "<"),
-    "<": Token(OP, "<"),
-    "CONTAINS": Token(OP, ">"),
-    ">": Token(OP, ">"),
     "SET": Token("SET", "SET"),
     "BEGIN": Token("BEGIN", "BEGIN"),
     "END": Token("END", "END"),
     "DEFUN": Token("DEFUN", "DEFUN"),
     "ECHO": Token("ECHO", "ECHO"),
     "->": Token("ARROW", "->"),
-    ":=": Token("OP", ":="),
-    #"True": Token("BOOL", "True"),
-    #"False": Token("BOOL", "False"),
-    "||": Token("OP", "||"),
-    "(": Token("LPAREN", "("),
-    ")": Token("RPAREN", ")"),
+    "True": Token("BOOL", "True"),
+    "False": Token("BOOL", "False"),
     ":": Token("COLON", ":"),
     ";": Token("SEMI", ";"),
     ",": Token("COMMA", ","),
-    "*": Token("STAR", "*"), 
-    "<>": Token("OP", "<>"),
-    "=": Token("OP", "="),
+    "(": Token("LPAREN", "("),
+    ")": Token("RPAREN", ")"),
+    ":=": Token(OP, ":="),
+    "||=": Token(OP, "||="),
+    "+=": Token(OP, "+="),
+    "*=": Token(OP, "*="),
+    "-=": Token(OP, "-="),
     "&": Token("OP", "&"),
     "|": Token("OP", "|"),
+    "<>": Token("OP", "<>"),
+    "=": Token("OP", "="),
+    "IN": Token(OP, "<"),
+    "<": Token(OP, "<"),
+    "CONTAINS": Token(OP, ">"),
+    ">": Token(OP, ">"),
+    "+": Token(OP, "+"),
+    "-": Token(OP, "-"),
+    "||": Token("OP", "||"),
+    "*": Token(OP, "*"),
+    "!": Token(OP, "!"),
 }
 
 
@@ -49,8 +56,8 @@ class Lexer(object):
         self.current_char = self.text[0]
     def error(self):
         raise Exception("LEXING ERROR: %s" % self.text[self.pos])
-    def peek(self):
-        peek_pos = self.pos + 1
+    def peek(self, lookahead=1):
+        peek_pos = self.pos + lookahead
         if peek_pos >= len(self.text):
             return None
         else:
@@ -73,6 +80,12 @@ class Lexer(object):
             result += self.current_char
             self.advance()
         return result
+    def _int(self):
+        result = ""
+        while self.current_char is not None and (self.current_char.isdigit() or self.current_char == "_"):
+            result += self.current_char
+            self.advance()
+        return Token(INT, int(result.replace("_", "")))   
     def get_next_token(self):
         # tokenizer
         text = self.text
@@ -82,6 +95,8 @@ class Lexer(object):
             return Token(EOF, None)
         while self.current_char is not None:
             # alphabetic RESERVED_KEYWORDS & ID
+            if self.current_char.isdigit():
+                return self._int()
             if self.current_char.isalnum():
                 return self._id()
             # STR
@@ -91,6 +106,12 @@ class Lexer(object):
                 self.advance()
                 return Token(STR, result)
             # all other two character operators, see RESERVED_KEYWORDS 
+            elif self.current_char + (self.peek() or "") + (self.peek(2) or "") in RESERVED_KEYWORDS:
+                cur = self.current_char + (self.peek() or "") + (self.peek(2) or "")
+                self.advance()
+                self.advance()
+                self.advance()
+                return RESERVED_KEYWORDS[cur]
             elif self.current_char + (self.peek() or "") in RESERVED_KEYWORDS:
                 cur = self.current_char + (self.peek() or "")
                 self.advance()

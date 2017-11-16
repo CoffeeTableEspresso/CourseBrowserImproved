@@ -54,8 +54,8 @@ class Parser(object):
             cond = None
         return TriOp(Token(SELECT, SELECT), columns, db, cond)
     def cols(self):
-        if self.current_token.type == STAR:
-            self.eat(STAR)
+        if self.current_token.value == "*":
+            self.eat(OP)
             return "*"
         else:
             columns = []
@@ -87,42 +87,50 @@ class Parser(object):
     def expr(self):
         if self.current_token.type == BEGIN:
             return self.begin_block()
-        elif self.next_token.value in [":=", "||="]:
+        elif self.next_token.value in [":=", "||=", "*=", "+=", "-="]:
             return self.asgn()
         else:
             return self.fact0()
     def fact0(self):
-        # TODO: add "!" in proper place
-        #if self.current_token.value == "!":
-        #   self.eat(OP)
-        #   return UnOp(Token(OP, "!"), self.fact0())
-        first = self.fact1()
-        if self.current_token.value in ["&", "|"]:
+        curr = self.fact1()
+        while self.current_token.value in ["&", "|"]:
             op = self.current_token
             self.eat(OP)
-            second = self.fact0()
-            return BinOp(op, first, second)
-        else:
-            return first
+            curr = BinOp(op, curr, self.fact1())
+        return curr 
     def fact1(self):
-        first = self.fact2()
-        if self.current_token.value in ["<>", "=", "<", ">"]:
+        curr = self.fact2()
+        while self.current_token.value in ["=", "<>"]:
             op = self.current_token
             self.eat(OP)
-            second = self.fact1()
-            return BinOp(op, first, second)
-        else:
-            return first
+            curr = BinOp(op, curr, self.fact2())
+        return curr 
     def fact2(self):
-        first = self.fact3()
-        if self.current_token.value == "||":
+        curr = self.fact3()
+        while self.current_token.value in ["<", ">"]:
             op = self.current_token
             self.eat(OP)
-            second = self.fact2()
-            return BinOp(op, first, second)
-        else:
-            return first
+            curr = BinOp(op, curr, self.fact3())
+        return curr 
     def fact3(self):
+        curr = self.fact4()
+        while self.current_token.value in ["+", "-", "||"]:
+            op = self.current_token
+            self.eat(OP)
+            curr = BinOp(op, curr, self.fact4())
+        return curr 
+    def fact4(self):
+        curr = self.const()
+        while self.current_token.value in ["*"]:
+            op = self.current_token
+            self.eat(OP)
+            curr = BinOp(op, curr, self.const())
+        return curr 
+    def const(self):
+        if self.current_token.value in ["-", "+", "!"]:
+            op = self.current_token
+            self.eat(OP)
+            return UnOp(op, self.const()) 
         if self.current_token.type == LPAREN:
             self.eat(LPAREN)
             expr = self.expr()
@@ -138,6 +146,10 @@ class Parser(object):
             string = self.current_token
             self.eat(STR)
             return String(string)
+        elif self.current_token.type == INT:
+            integer = self.current_token
+            self.eat(INT)
+            return Integer(integer)
         elif self.current_token.type == BOOL:
             boolean = self.current_token
             self.eat(BOOL)
@@ -149,6 +161,18 @@ class Parser(object):
             self.eat(OP)
             val = self.expr()
             return Assign(var, val)
+        elif self.current_token.value == "||=":
+            self.eat(OP)
+            val = self.expr()
+            return Assign(var, BinOp(Token(OP, "||"), var, val))
+        elif self.current_token.value == "*=":
+            self.eat(OP)
+            val = self.expr()
+            return Assign(var, BinOp(Token(OP, "*"), var, val))
+        elif self.current_token.value == "+=":
+            self.eat(OP)
+            val = self.expr()
+            return Assign(var, BinOp(Token(OP, "+"), var, val))
         else: 
             self.error() #TODO: add support for ||=   
     def func_call(self):

@@ -20,6 +20,10 @@ The following commands are useful for getting started:
 * variables:
     - syntax: <var_name> := <val>
     - e.g. `best_dept := "MATH"`
+* control flow:
+    - ternary operator:
+        - syntax: `<cond> ? <val1> : <val2>`
+        - e.g. `DEFUN fact : n -> n = 0 ? 1 : fact(n-1)*n`
 * operators:
     - supports `+, -, *` for `INT`, `||, <, >` (`STR` concat and contains) for `STR`, `!, &, |` for `BOOL`.
 * function definitions:

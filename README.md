@@ -21,7 +21,7 @@ The following commands are useful for getting started:
     - syntax: <var_name> := <val>
     - e.g. `best_dept := "MATH"`
 * operators:
-    - supports `+, -, *` for `INT`, `||, <, >` (STR concat and contains) for STR, `!, &, |` for BOOL.
+    - supports `+, -, *` for `INT`, `||, <, >` (`STR` concat and contains) for `STR`, `!, &, |` for `BOOL`.
 * function definitions:
     - syntax: DEFUN <name> : <params> -> <body>
     - e.g. `DEFUN postreqs : n -> SELECT title FROM Courses WHERE n < prereqs`

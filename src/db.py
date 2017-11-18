@@ -50,7 +50,10 @@ class Course(object):
         self.coreqs = coreqs or ""
     def __str__(self):
         myStr = "%s\n\tDsc: %s\n\tPr: %s\n\tCo: %s\n" % (self.title, self.description, self.prereqs, self.coreqs)
-        return "".join(s for s in myStr if s in string.printable)
+        return myStr
+
+def printable_str(myStr):
+    return str("".join(s for s in myStr if s in string.printable))
 
 def build_db(btree):
     for dept in DEPTS:
@@ -76,7 +79,7 @@ def build_db(btree):
                 except IndexError:
                     description = ""
                     title = ""
-                btree.insert(Course(name, title, description, prereqs, coreqs))
+                btree.insert(Course(printable_str(name), printable_str(title), printable_str(description), printable_str(prereqs), printable_str(coreqs)))
                 print '\r' + name,
                 sys.stdout.flush()
     print '\r' + " "*8 + '\r',

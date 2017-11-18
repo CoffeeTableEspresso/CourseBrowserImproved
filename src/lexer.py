@@ -10,14 +10,41 @@ RESERVED_KEYWORDS = {
     "SELECT": Token("SELECT", "SELECT"),
     "FROM": Token("FROM", "FROM"),
     "WHERE": Token("WHERE", "WHERE"),
-    "IN": Token(OP, "IN"),
-    "CONTAINS": Token(OP, "CONTAINS"),
     "SET": Token("SET", "SET"),
-    "DEFUN": Token("DEFUN", "DEFUN"),
     "BEGIN": Token("BEGIN", "BEGIN"),
     "END": Token("END", "END"),
+    "DEFUN": Token("DEFUN", "DEFUN"),
     "ECHO": Token("ECHO", "ECHO"),
+    "->": Token("ARROW", "->"),
+    "True": Token("BOOL", True),
+    "False": Token("BOOL", False),
+    ":": Token("COLON", ":"),
+    "?": Token("QMARK", "?"),
+    ";": Token("SEMI", ";"),
+    ",": Token("COMMA", ","),
+    "(": Token("LPAREN", "("),
+    ")": Token("RPAREN", ")"),
+    ":=": Token(OP, ":="),
+    "||=": Token(OP, "||="),
+    "+=": Token(OP, "+="),
+    "*=": Token(OP, "*="),
+    "-=": Token(OP, "-="),
+    "&": Token("OP", "&"),
+    "|": Token("OP", "|"),
+    "<>": Token("OP", "<>"),
+    "=": Token("OP", "="),
+    "IN": Token(OP, "<"),
+    "<": Token(OP, "<"),
+    "CONTAINS": Token(OP, ">"),
+    ">": Token(OP, ">"),
+    "+": Token(OP, "+"),
+    "-": Token(OP, "-"),
+    "||": Token("OP", "||"),
+    "*": Token(OP, "*"),
+    "!": Token(OP, "!"),
 }
+
+
 
 # TODO: add INT
 class Lexer(object):
@@ -30,8 +57,8 @@ class Lexer(object):
         self.current_char = self.text[0]
     def error(self):
         raise Exception("LEXING ERROR: %s" % self.text[self.pos])
-    def peek(self):
-        peek_pos = self.pos + 1
+    def peek(self, lookahead=1):
+        peek_pos = self.pos + lookahead
         if peek_pos >= len(self.text):
             return None
         else:
@@ -54,6 +81,12 @@ class Lexer(object):
             result += self.current_char
             self.advance()
         return result
+    def _int(self):
+        result = ""
+        while self.current_char is not None and (self.current_char.isdigit() or self.current_char == "_"):
+            result += self.current_char
+            self.advance()
+        return Token(INT, int(result.replace("_", "")))   
     def get_next_token(self):
         # tokenizer
         text = self.text
@@ -62,38 +95,32 @@ class Lexer(object):
         if self.pos >= len(text):
             return Token(EOF, None)
         while self.current_char is not None:
-            # RESERVED_KEYWORDS & ID
+            # alphabetic RESERVED_KEYWORDS & ID
+            if self.current_char.isdigit():
+                return self._int()
             if self.current_char.isalnum():
                 return self._id()
-            elif self.current_char == "(":
-                self.advance()
-                return Token(LPAREN, "(")
-            elif self.current_char == ")":
-                self.advance()
-                return Token(RPAREN, ")")
-            elif self.current_char == ":":
-                self.advance()
-                return Token(COLON, ":")
-            elif self.current_char == ";":
-                self.advance()
-                return Token(SEMI, ";")
+            # STR
             elif self.current_char == '"':
                 self.advance()
                 result = self._str()
                 self.advance()
                 return Token(STR, result)
-            elif self.current_char == "-" and self.peek() == ">":
+            # all other two character operators, see RESERVED_KEYWORDS 
+            elif self.current_char + (self.peek() or "") + (self.peek(2) or "") in RESERVED_KEYWORDS:
+                cur = self.current_char + (self.peek() or "") + (self.peek(2) or "")
                 self.advance()
                 self.advance()
-                return Token(ARROW, "->")
-            elif self.current_char == ",":
                 self.advance()
-                return Token(COMMA, ",")
-            elif self.current_char == "*":
+                return RESERVED_KEYWORDS[cur]
+            elif self.current_char + (self.peek() or "") in RESERVED_KEYWORDS:
+                cur = self.current_char + (self.peek() or "")
                 self.advance()
-                return Token(STAR, "*")
-            elif self.current_char in ["=", "|", "&"]:
-                op = self.current_char
                 self.advance()
-                return Token(OP, op)
-        self.error()
+                return RESERVED_KEYWORDS[cur]
+            # All other one character operators, see RESERVED_KEYWORDS
+            elif self.current_char in RESERVED_KEYWORDS:
+                cur = self.current_char
+                self.advance()
+                return RESERVED_KEYWORDS[cur]
+            self.error()

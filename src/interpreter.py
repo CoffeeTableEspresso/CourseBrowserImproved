@@ -190,6 +190,10 @@ class Interpreter(NodeVisitor):
             val = self.visit(node.expr)
             assert type(val) is int
             return -val
+        elif node.op.value == "+":
+            val = self.visit(node.expr)
+            assert type(val) is int
+            return val
     #def visit_NulOp(self, node):
     #   return "MC TEXT"
     def visit_FuncDecl(self, node):

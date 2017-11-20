@@ -14,7 +14,7 @@ def main():
     interpreter.interpret()
     while True:
         try:
-            text = raw_input("CBQL>")
+            text = raw_input("CBQL> ")
         except EOFError:
             break
         if not text:

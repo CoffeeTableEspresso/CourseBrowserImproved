@@ -15,6 +15,7 @@ RESERVED_KEYWORDS = {
     "END": Token("END", "END"),
     "DEFUN": Token("DEFUN", "DEFUN"),
     "ECHO": Token("ECHO", "ECHO"),
+    "WHILE": Token(WHILE, WHILE),
     "->": Token("ARROW", "->"),
     "True": Token("BOOL", True),
     "False": Token("BOOL", False),
@@ -42,6 +43,8 @@ RESERVED_KEYWORDS = {
     "||": Token("OP", "||"),
     "*": Token(OP, "*"),
     "!": Token(OP, "!"),
+    #"++": Token(OP, "++"),
+    #"--": Token(OP, "--"),
 }
 
 

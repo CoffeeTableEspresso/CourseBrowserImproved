@@ -159,6 +159,13 @@ class Interpreter(NodeVisitor):
             else:
                 return self.visit(node.right)
     def visit_BinOp(self, node):
+        if node.op.type == WHILE:
+            def true_bool(b):
+                assert type(b) is bool
+                return b
+            while true_bool(self.visit(node.left)):
+                self.visit(node.right)
+            return    
         left = self.visit(node.left)
         right = self.visit(node.right)
         if node.op.value in ["=", "<>"]:
@@ -194,6 +201,14 @@ class Interpreter(NodeVisitor):
             val = self.visit(node.expr)
             assert type(val) is int
             return val
+        #elif node.op.value == "++":
+        #   val = self.visit(node.expr)
+        #   assert type(val) is int
+        #   self.mem.insert(node.expr.value, val+1)
+        #elif node.op.value == "--":
+        #   val = self.visit(node.expr)
+        #   assert type(val) is int
+        #   self.mem.insert(node.expr.value, val-1)
     #def visit_NulOp(self, node):
     #   return "MC TEXT"
     def visit_FuncDecl(self, node):

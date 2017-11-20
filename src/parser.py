@@ -25,7 +25,7 @@ class Parser(object):
     def program(self):
         if self.current_token.type == BEGIN:
             return self.begin_block()
-        elif self.current_token.type in [SELECT, DEFUN]:
+        elif self.current_token.type in [SELECT, DEFUN, WHILE]: # or (self.current_token.type == ID and self.next_token.type == OP and self.next_token.value in ["++", "--"]):
             return self.statement()
         else:
             return self.expr()
@@ -40,6 +40,14 @@ class Parser(object):
     def statement(self):
         if self.current_token.type == SELECT:
             return self.select_statement()
+        #elif self.current_token.type == ID and self.next_token.value in ["++", "--"]:
+        #   var = self.current_token
+        #   self.eat(ID)
+        #   op = self.current_token
+        #   self.eat(OP)
+        #   return UnOp(op, Var(var))
+        elif self.current_token.type == WHILE:
+            return self.while_statement()
         else: #if self.current_token.type == DEFUN:
             return self.def_func()
     def select_statement(self):
@@ -68,6 +76,12 @@ class Parser(object):
         token = self.current_token
         self.eat(ID)
         return DB(token)
+    def while_statement(self):
+        self.eat(WHILE)
+        expr = self.expr()
+        self.eat(COLON)
+        body = self.program()
+        return BinOp(Token(WHILE, WHILE), expr, body)
     def def_func(self):
         self.eat(DEFUN)
         name = Var(self.current_token)
@@ -181,8 +195,12 @@ class Parser(object):
             self.eat(OP)
             val = self.expr()
             return Assign(var, BinOp(Token(OP, "+"), var, val))
+        elif self.current_token.value == "-=":
+            self.eat(OP)
+            val = self.expr()
+            return Assign(var, BinOp(Token(OP, "-"), var, val))
         else: 
-            self.error() #TODO: add support for ||=   
+            self.error() 
     def func_call(self):
         name = self.current_token
         self.eat(ID)
